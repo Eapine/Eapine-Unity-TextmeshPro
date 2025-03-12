@@ -59,9 +59,10 @@ sysinfo.txt
 # Builds
 *.apk
 *.aab
-*.unitypackage
-*.unitypackage.meta
 *.app
+
+### macOS ###
+.DS_Store
 
 # Crashlytics generated file
 crashlytics-build.properties
