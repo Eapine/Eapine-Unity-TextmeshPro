@@ -168,7 +168,7 @@ namespace TMPro
         /// <summary>
         /// The Font Asset to be assigned to this text object.
         /// </summary>
-        public TMP_FontAsset font
+        public virtual TMP_FontAsset font
         {
             get { return m_fontAsset; }
             set { if (m_fontAsset == value) return; m_fontAsset = value; LoadFontAsset(); m_havePropertiesChanged = true; SetVerticesDirty(); SetLayoutDirty(); }
@@ -3934,7 +3934,7 @@ namespace TMPro
             //Debug.Log("*** CalculatePreferredValues() ***"); // ***** Frame: " + Time.frameCount);
 
             // Early exit if no font asset was assigned. This should not be needed since LiberationSans SDF will be assigned by default.
-            if (m_fontAsset == null || m_fontAsset.characterLookupTable == null)
+            if (font == null || font.characterLookupTable == null)
             {
                 Debug.LogWarning("Can't Generate Mesh! No Font Asset has been assigned to Object ID: " + this.GetInstanceID());
 
@@ -3949,7 +3949,7 @@ namespace TMPro
                 return Vector2.zero;
             }
 
-            m_currentFontAsset = m_fontAsset;
+            m_currentFontAsset = font;
             m_currentMaterial = m_sharedMaterial;
             m_currentMaterialIndex = 0;
             m_materialReferenceStack.SetDefault(new MaterialReference(0, m_currentFontAsset, null, m_currentMaterial, m_padding));
@@ -3962,7 +3962,7 @@ namespace TMPro
 
             // Calculate the scale of the font based on selected font size and sampling point size.
             // baseScale is calculated using the font asset assigned to the text object.
-            float baseScale = (fontSize / m_fontAsset.faceInfo.pointSize * m_fontAsset.faceInfo.scale * (m_isOrthographic ? 1 : 0.1f));
+            float baseScale = (fontSize / font.faceInfo.pointSize * font.faceInfo.scale * (m_isOrthographic ? 1 : 0.1f));
             float currentElementScale = baseScale;
             float currentEmScale = fontSize * 0.01f * (m_isOrthographic ? 1 : 0.1f);
             m_fontScaleMultiplier = 1;
@@ -5702,7 +5702,7 @@ namespace TMPro
         protected virtual void DrawUnderlineMesh(Vector3 start, Vector3 end, ref int index, float startScale, float endScale, float maxScale, float sdfScale, Color32 underlineColor)
         {
             // Get Underline special character from the primary font asset.
-            GetUnderlineSpecialCharacter(m_fontAsset);
+            GetUnderlineSpecialCharacter(font);
 
             if (m_Underline.character == null)
             {
@@ -5863,7 +5863,7 @@ namespace TMPro
         {
             if (m_Underline.character == null)
             {
-                GetUnderlineSpecialCharacter(m_fontAsset);
+                GetUnderlineSpecialCharacter(font);
 
                 if (m_Underline.character == null)
                 {
@@ -6155,10 +6155,10 @@ namespace TMPro
             }
 
             // Search for the character in the primary font asset if not the current font asset
-            if (fontAsset.instanceID != m_fontAsset.instanceID)
+            if (fontAsset.instanceID != font.instanceID)
             {
                 // Search primary font asset
-                character = TMP_FontAssetUtilities.GetCharacterFromFontAsset(unicode, m_fontAsset, false, fontStyle, fontWeight, out isUsingAlternativeTypeface);
+                character = TMP_FontAssetUtilities.GetCharacterFromFontAsset(unicode, font, false, fontStyle, fontWeight, out isUsingAlternativeTypeface);
 
                 // Use material and index of primary font asset.
                 if (character != null)
@@ -6173,8 +6173,8 @@ namespace TMPro
                 }
 
                 // Search list of potential fallback font assets assigned to the primary font asset.
-                if (m_fontAsset.m_FallbackFontAssetTable != null && m_fontAsset.m_FallbackFontAssetTable.Count > 0)
-                    character = TMP_FontAssetUtilities.GetCharacterFromFontAssets(unicode, fontAsset, m_fontAsset.m_FallbackFontAssetTable, true, fontStyle, fontWeight, out isUsingAlternativeTypeface);
+                if (font.m_FallbackFontAssetTable != null && font.m_FallbackFontAssetTable.Count > 0)
+                    character = TMP_FontAssetUtilities.GetCharacterFromFontAssets(unicode, font, font.m_FallbackFontAssetTable, true, fontStyle, fontWeight, out isUsingAlternativeTypeface);
 
                 if (character != null)
                 {
@@ -8346,7 +8346,7 @@ namespace TMPro
                                 break;
                             case TagUnitType.Percentage:
                                 fontScale = (m_currentFontSize / m_currentFontAsset.faceInfo.pointSize * m_currentFontAsset.faceInfo.scale * (m_isOrthographic ? 1 : 0.1f));
-                                m_lineHeight = m_fontAsset.faceInfo.lineHeight * value / 100 * fontScale;
+                                m_lineHeight = font.faceInfo.lineHeight * value / 100 * fontScale;
                                 break;
                         }
                         return true;

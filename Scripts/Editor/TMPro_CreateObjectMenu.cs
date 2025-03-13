@@ -162,7 +162,7 @@ namespace TMPro.EditorUtilities
         private static TMP_DefaultControls.Resources s_StandardResources;
 
 
-        private static TMP_DefaultControls.Resources GetStandardResources()
+        public static TMP_DefaultControls.Resources GetStandardResources()
         {
             if (s_StandardResources.standard == null)
             {
@@ -226,7 +226,7 @@ namespace TMPro.EditorUtilities
         }
 
 
-        private static void PlaceUIElementRoot(GameObject element, MenuCommand menuCommand)
+        public static void PlaceUIElementRoot(GameObject element, MenuCommand menuCommand)
         {
             GameObject parent = menuCommand.context as GameObject;
             bool explicitParentChoice = true;

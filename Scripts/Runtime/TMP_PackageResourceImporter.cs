@@ -74,7 +74,7 @@ namespace TMPro
                 GUILayout.EndVertical();
             }
             GUILayout.EndVertical();
-            GUILayout.Space(5f);
+            //GUILayout.Space(5f);
         }
 
         internal void RegisterResourceImportCallback()
@@ -213,6 +213,24 @@ namespace TMPro
         void OnGUI()
         {
             m_ResourceImporter.OnGUI();
+            
+            bool m_RuntimeFontSettingsImported = File.Exists("Assets/TextMesh Pro/Resources/TMP RuntimeFont Settings.asset");
+
+            GUILayout.BeginVertical(EditorStyles.helpBox);
+            {
+                GUILayout.Label("TMP Runtime Font", EditorStyles.boldLabel);
+                GUILayout.Label("Before using \"Runtime Font Text\", you need to create \"TMP RuntimeFont Settings.asset\" in \"Assets/TextMesh Pro/Resources/\" folder.", new GUIStyle(EditorStyles.label) { wordWrap = true } );
+                GUILayout.Space(5f);
+
+                GUI.enabled = !m_RuntimeFontSettingsImported;
+                if (GUILayout.Button("Create TMP RuntimeFont Settings"))
+                {
+                    TMP_RuntimeFontSettings.CreateTMPRuntimeFontSettings();
+                }
+                GUILayout.Space(5f);
+                GUI.enabled = true;
+            }
+            GUILayout.EndVertical();
         }
 
         void OnInspectorUpdate()
@@ -227,7 +245,7 @@ namespace TMPro
         {
             EditorWindow editorWindow = this;
 
-            Vector2 windowSize = new Vector2(640, 210);
+            Vector2 windowSize = new Vector2(640, 290);
             editorWindow.minSize = windowSize;
             editorWindow.maxSize = windowSize;
         }
