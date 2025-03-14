@@ -5424,8 +5424,8 @@ namespace TMPro
 
 
             #region Setup Normals & Tangents
-            Vector3 normal = new Vector3(0, 0, -1);
-            Vector4 tangent = new Vector4(-1, 0, 0, 1);
+            Vector3 normal = Vector3.zero;
+            Vector4 tangent = Vector4.one;
             SetupNormalsAndTangents(out normal, out tangent);
 
             // Normal
