@@ -14,8 +14,8 @@ namespace TMPro
 
         public static TMP_Vertex zero { get { return k_Zero; } }
 
-        //public Vector3 normal;
-        //public Vector4 tangent;
+        public Vector3 normal;
+        public Vector4 tangent;
 
         static readonly TMP_Vertex k_Zero = new TMP_Vertex();
     }

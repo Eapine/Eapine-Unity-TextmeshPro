@@ -643,6 +643,42 @@ namespace TMPro
             color = colors32[dst_Index + 3];
             colors32[dst_Index + 3] = colors32[src_Index + 3];
             colors32[src_Index + 3] = color;
+
+            // Vertex Normals
+            Vector3 normal;
+            normal = normals[dst_Index + 0];
+            normals[dst_Index + 0] = normals[src_Index + 0];
+            normals[src_Index + 0] = normal;
+
+            normal = normals[dst_Index + 1];
+            normals[dst_Index + 1] = normals[src_Index + 1];
+            normals[src_Index + 1] = normal;
+
+            normal = normals[dst_Index + 2];
+            normals[dst_Index + 2] = normals[src_Index + 2];
+            normals[src_Index + 2] = normal;
+
+            normal = normals[dst_Index + 3];
+            normals[dst_Index + 3] = normals[src_Index + 3];
+            normals[src_Index + 3] = normal;
+
+            // Tangents
+            Vector4 tangent;
+            tangent = tangents[dst_Index + 0];
+            tangents[dst_Index + 0] = tangents[src_Index + 0];
+            tangents[src_Index + 0] = tangent;
+
+            tangent = tangents[dst_Index + 1];
+            tangents[dst_Index + 1] = tangents[src_Index + 1];
+            tangents[src_Index + 1] = tangent;
+
+            tangent = tangents[dst_Index + 2];
+            tangents[dst_Index + 2] = tangents[src_Index + 2];
+            tangents[src_Index + 2] = tangent;
+
+            tangent = tangents[dst_Index + 3];
+            tangents[dst_Index + 3] = tangents[src_Index + 3];
+            tangents[src_Index + 3] = tangent;
         }
 
 

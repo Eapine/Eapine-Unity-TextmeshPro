@@ -16,6 +16,8 @@ namespace TMPro
         Uv2 = 0x4,
         Uv4 = 0x8,
         Colors32 = 0x10,
+        Normals = 0x20,
+        Tangents = 0x40,
         All = 0xFF
     };
 

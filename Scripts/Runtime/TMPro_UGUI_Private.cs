@@ -18,7 +18,9 @@ namespace TMPro
 
         protected TMP_SubMeshUI[] m_subTextObjects = new TMP_SubMeshUI[8];
 
+        private float m_previousLossyScaleX = -1; // Used for Tracking lossy scale changes in the transform;
         private float m_previousLossyScaleY = -1; // Used for Tracking lossy scale changes in the transform;
+        private float m_previousLossyScaleZ = -1; // Used for Tracking lossy scale changes in the transform;
 
         private Vector3[] m_RectTransformCorners = new Vector3[4];
         private CanvasRenderer m_canvasRenderer;
@@ -1588,17 +1590,42 @@ namespace TMPro
             // We need to update the SDF scale or possibly regenerate the text object if lossy scale has changed.
             if (m_havePropertiesChanged == false)
             {
-                float lossyScaleY = m_rectTransform.lossyScale.y;
-
                 // Ignore very small lossy scale changes as their effect on SDF Scale would not be visually noticeable.
                 // Do not update SDF Scale if the text is null or empty
-                if (Mathf.Abs(lossyScaleY - m_previousLossyScaleY) > 0.0001f && m_TextProcessingArray[0].unicode != 0)
+                if (m_TextProcessingArray[0].unicode != 0)
                 {
-                    float scaleDelta = lossyScaleY / m_previousLossyScaleY;
+                    float lossyScaleX = m_rectTransform.lossyScale.x;
+                    float lossyScaleY = m_rectTransform.lossyScale.y;
+                    float lossyScaleZ = m_rectTransform.lossyScale.z;
 
-                    UpdateSDFScale(scaleDelta);
+                    bool scaleXChange = Mathf.Abs(lossyScaleX - m_previousLossyScaleX) > 0.0001f;
+                    bool scaleYChange = Mathf.Abs(lossyScaleY - m_previousLossyScaleY) > 0.0001f;
+                    bool scaleZChange = Mathf.Abs(lossyScaleZ - m_previousLossyScaleZ) > 0.0001f;
 
-                    m_previousLossyScaleY = lossyScaleY;
+                    if (scaleYChange)
+                    {
+                        float scaleDelta = lossyScaleY / m_previousLossyScaleY;
+
+                        UpdateSDFScale(scaleDelta);
+                    }
+
+                    if (scaleXChange || scaleYChange || scaleZChange)
+                    {
+                        UpdateOutlineScale();
+                    }
+
+                    if (scaleXChange)
+                    {
+                        m_previousLossyScaleX = lossyScaleX;
+                    }
+                    if (scaleYChange)
+                    {
+                        m_previousLossyScaleY = lossyScaleY;
+                    }
+                    if (scaleZChange)
+                    {
+                        m_previousLossyScaleZ = lossyScaleZ;
+                    }
                 }
             }
 
@@ -4436,6 +4463,8 @@ namespace TMPro
                 m_mesh.uv2 = m_textInfo.meshInfo[0].uvs2;
                 //m_mesh.uv4 = m_textInfo.meshInfo[0].uvs4;
                 m_mesh.colors32 = m_textInfo.meshInfo[0].colors32;
+                m_mesh.normals = m_textInfo.meshInfo[0].normals;
+                m_mesh.tangents = m_textInfo.meshInfo[0].tangents;
 
                 // Compute Bounds for the mesh. Manual computation is more efficient then using Mesh.RecalcualteBounds.
                 m_mesh.RecalculateBounds();
@@ -4465,6 +4494,8 @@ namespace TMPro
                     m_subTextObjects[i].mesh.uv2 = m_textInfo.meshInfo[i].uvs2;
                     //m_subTextObjects[i].mesh.uv4 = m_textInfo.meshInfo[i].uvs4;
                     m_subTextObjects[i].mesh.colors32 = m_textInfo.meshInfo[i].colors32;
+                    m_subTextObjects[i].mesh.normals = m_textInfo.meshInfo[i].normals;
+                    m_subTextObjects[i].mesh.tangents = m_textInfo.meshInfo[i].tangents;
 
                     m_subTextObjects[i].mesh.RecalculateBounds();
 
@@ -4673,5 +4704,87 @@ namespace TMPro
             }
         }
 
+        protected override void SetupNormalsAndTangents(out Vector3 normal, out Vector4 tangent)
+        {
+            normal = Vector3.zero;
+            tangent = Vector4.one;
+            if (m_enableOutline)
+            {
+                Vector3 scaleVector3 = new Vector3(transform.lossyScale.x, transform.lossyScale.y, transform.lossyScale.z);
+                if (canvas != null)
+                {
+                    Canvas rootCanvas = canvas.rootCanvas;
+                    scaleVector3.x /= rootCanvas.transform.lossyScale.x;
+                    scaleVector3.y /= rootCanvas.transform.lossyScale.y;
+                    scaleVector3.z /= rootCanvas.transform.lossyScale.z;
+                    normal = new Vector3(m_textOutlineThickness / scaleVector3.x, m_textOutlineSoftness / scaleVector3.y, m_textOutlineDilate / scaleVector3.z);
+                    tangent = new Vector4(m_textOutlineColor.r / scaleVector3.x, m_textOutlineColor.g / scaleVector3.y, m_textOutlineColor.b / scaleVector3.z, m_textOutlineColor.a);
+                }
+                else
+                {
+                    normal = new Vector3(m_textOutlineThickness, m_textOutlineSoftness, m_textOutlineDilate);
+                    tangent = new Vector4(m_textOutlineColor.r, m_textOutlineColor.g, m_textOutlineColor.b, m_textOutlineColor.a);
+                }
+            }
+        }
+
+        void UpdateOutlineScale()
+        {
+            if (!m_enableOutline)
+            {
+                return;
+            }
+
+            Vector3 normal = Vector3.zero;
+            Vector4 tangent = Vector4.one;
+            SetupNormalsAndTangents(out normal, out tangent);
+
+            for (int characterIndex = 0; characterIndex < m_characterCount; characterIndex++)
+            {
+                m_textInfo.characterInfo[characterIndex].vertex_BL.normal = normal;
+                m_textInfo.characterInfo[characterIndex].vertex_TL.normal = normal;
+                m_textInfo.characterInfo[characterIndex].vertex_TR.normal = normal;
+                m_textInfo.characterInfo[characterIndex].vertex_BR.normal = normal;
+
+                m_textInfo.characterInfo[characterIndex].vertex_BL.tangent = tangent;
+                m_textInfo.characterInfo[characterIndex].vertex_TL.tangent = tangent;
+                m_textInfo.characterInfo[characterIndex].vertex_TR.tangent = tangent;
+                m_textInfo.characterInfo[characterIndex].vertex_BR.tangent = tangent;
+
+                //--------------------------------------------------------------------
+                int materialIndex = m_textInfo.characterInfo[characterIndex].materialReferenceIndex;
+                if (m_textInfo.meshInfo[materialIndex].normals.Length > (3 + characterIndex * 4))
+                {
+                    m_textInfo.meshInfo[materialIndex].normals[0 + characterIndex * 4] = m_textInfo.characterInfo[characterIndex].vertex_BL.normal;
+                    m_textInfo.meshInfo[materialIndex].normals[1 + characterIndex * 4] = m_textInfo.characterInfo[characterIndex].vertex_TL.normal;
+                    m_textInfo.meshInfo[materialIndex].normals[2 + characterIndex * 4] = m_textInfo.characterInfo[characterIndex].vertex_TR.normal;
+                    m_textInfo.meshInfo[materialIndex].normals[3 + characterIndex * 4] = m_textInfo.characterInfo[characterIndex].vertex_BR.normal;
+                }
+
+                if (m_textInfo.meshInfo[materialIndex].tangents.Length > (3 + characterIndex * 4))
+                {
+                    m_textInfo.meshInfo[materialIndex].tangents[0 + characterIndex * 4] = m_textInfo.characterInfo[characterIndex].vertex_BL.tangent;
+                    m_textInfo.meshInfo[materialIndex].tangents[1 + characterIndex * 4] = m_textInfo.characterInfo[characterIndex].vertex_TL.tangent;
+                    m_textInfo.meshInfo[materialIndex].tangents[2 + characterIndex * 4] = m_textInfo.characterInfo[characterIndex].vertex_TR.tangent;
+                    m_textInfo.meshInfo[materialIndex].tangents[3 + characterIndex * 4] = m_textInfo.characterInfo[characterIndex].vertex_BR.tangent;
+                }
+            }
+
+            for (int i = 0; i < m_textInfo.materialCount; i++)
+            {
+                if (i == 0)
+                {
+                    m_mesh.normals = m_textInfo.meshInfo[0].normals;
+                    m_mesh.tangents = m_textInfo.meshInfo[0].tangents;
+                    m_canvasRenderer.SetMesh(m_mesh);
+                }
+                else
+                {
+                    m_subTextObjects[i].mesh.normals = m_textInfo.meshInfo[i].normals;
+                    m_subTextObjects[i].mesh.tangents = m_textInfo.meshInfo[i].tangents;
+                    m_subTextObjects[i].canvasRenderer.SetMesh(m_subTextObjects[i].mesh);
+                }
+            }
+        }
     }
 }

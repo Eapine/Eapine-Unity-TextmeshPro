@@ -648,6 +648,12 @@ namespace TMPro
                 if ((flags & TMP_VertexDataUpdateFlags.Colors32) == TMP_VertexDataUpdateFlags.Colors32)
                     mesh.colors32 = m_textInfo.meshInfo[i].colors32;
 
+                if ((flags & TMP_VertexDataUpdateFlags.Normals) == TMP_VertexDataUpdateFlags.Normals)
+                    mesh.normals = m_textInfo.meshInfo[i].normals;
+
+                if ((flags & TMP_VertexDataUpdateFlags.Tangents) == TMP_VertexDataUpdateFlags.Tangents)
+                    mesh.tangents = m_textInfo.meshInfo[i].tangents;
+
                 mesh.RecalculateBounds();
 
                 if (i == 0)
@@ -685,6 +691,8 @@ namespace TMPro
                 mesh.uv2 = m_textInfo.meshInfo[i].uvs2;
                 //mesh.uv4 = m_textInfo.meshInfo[i].uvs4;
                 mesh.colors32 = m_textInfo.meshInfo[i].colors32;
+                mesh.normals = m_textInfo.meshInfo[i].normals;
+                mesh.tangents = m_textInfo.meshInfo[i].tangents;
 
                 mesh.RecalculateBounds();
 

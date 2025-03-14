@@ -236,8 +236,8 @@ namespace TMPro
                     m_CachedMeshInfo[i].uvs2 = new Vector2[length];
                     m_CachedMeshInfo[i].colors32 = new Color32[length];
 
-                    //m_CachedMeshInfo[i].normals = new Vector3[length];
-                    //m_CachedMeshInfo[i].tangents = new Vector4[length];
+                    m_CachedMeshInfo[i].normals = new Vector3[length];
+                    m_CachedMeshInfo[i].tangents = new Vector4[length];
                     //m_CachedMeshInfo[i].triangles = new int[meshInfo[i].triangles.Length];
                 }
             }
@@ -253,8 +253,8 @@ namespace TMPro
                     m_CachedMeshInfo[i].uvs2 = new Vector2[length];
                     m_CachedMeshInfo[i].colors32 = new Color32[length];
 
-                    //m_CachedMeshInfo[i].normals = new Vector3[length];
-                    //m_CachedMeshInfo[i].tangents = new Vector4[length];
+                    m_CachedMeshInfo[i].normals = new Vector3[length];
+                    m_CachedMeshInfo[i].tangents = new Vector4[length];
                     //m_CachedMeshInfo[i].triangles = new int[meshInfo[i].triangles.Length];
                 }
 
@@ -265,8 +265,8 @@ namespace TMPro
                 Array.Copy(meshInfo[i].uvs2, m_CachedMeshInfo[i].uvs2, length);
                 Array.Copy(meshInfo[i].colors32, m_CachedMeshInfo[i].colors32, length);
 
-                //Array.Copy(meshInfo[i].normals, m_CachedMeshInfo[i].normals, length);
-                //Array.Copy(meshInfo[i].tangents, m_CachedMeshInfo[i].tangents, length);
+                Array.Copy(meshInfo[i].normals, m_CachedMeshInfo[i].normals, length);
+                Array.Copy(meshInfo[i].tangents, m_CachedMeshInfo[i].tangents, length);
                 //Array.Copy(meshInfo[i].triangles, m_CachedMeshInfo[i].triangles, meshInfo[i].triangles.Length);
             }
 

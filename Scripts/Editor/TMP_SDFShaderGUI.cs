@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEditor;
+using System.Linq;
 
 namespace TMPro.EditorUtilities
 {
@@ -429,17 +430,18 @@ namespace TMPro.EditorUtilities
             EditorGUILayout.Space();
 
             EditorGUI.BeginChangeCheck();
-            bool useRatios = EditorGUILayout.Toggle("Use Ratios", !m_Material.IsKeywordEnabled("RATIOS_OFF"));
+            //bool useRatios = EditorGUILayout.Toggle("Use Ratios", !m_Material.IsKeywordEnabled(ShaderUtilities.Keyword_Ratios));
+            bool useRatios = EditorGUILayout.Toggle("Use Ratios", !m_Material.shaderKeywords.Contains(ShaderUtilities.Keyword_Ratios));
             if (EditorGUI.EndChangeCheck())
             {
                 m_Editor.RegisterPropertyChangeUndo("Use Ratios");
                 if (useRatios)
                 {
-                    m_Material.DisableKeyword("RATIOS_OFF");
+                    m_Material.DisableKeyword(ShaderUtilities.Keyword_Ratios);
                 }
                 else
                 {
-                    m_Material.EnableKeyword("RATIOS_OFF");
+                    m_Material.EnableKeyword(ShaderUtilities.Keyword_Ratios);
                 }
             }
 
