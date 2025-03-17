@@ -4306,9 +4306,12 @@ namespace TMPro
                 m_mesh.uv2 = m_textInfo.meshInfo[0].uvs2;
                 //m_mesh.uv4 = m_textInfo.meshInfo[0].uvs4;
                 m_mesh.colors32 = m_textInfo.meshInfo[0].colors32;
-                m_mesh.normals = m_textInfo.meshInfo[0].normals;
-                m_mesh.tangents = m_textInfo.meshInfo[0].tangents;
-
+                if (HasShaderPlusFlag)
+                {
+                    m_mesh.normals = m_textInfo.meshInfo[0].normals;
+                    m_mesh.tangents = m_textInfo.meshInfo[0].tangents;    
+                }
+                
                 // Compute Bounds for the mesh. Manual computation is more efficient then using Mesh.RecalcualteBounds.
                 m_mesh.RecalculateBounds();
                 //m_mesh.bounds = new Bounds(new Vector3((m_meshExtents.max.x + m_meshExtents.min.x) / 2, (m_meshExtents.max.y + m_meshExtents.min.y) / 2, 0) + offset, new Vector3(m_meshExtents.max.x - m_meshExtents.min.x, m_meshExtents.max.y - m_meshExtents.min.y, 0));
@@ -4329,9 +4332,12 @@ namespace TMPro
                     m_subTextObjects[i].mesh.uv2 = m_textInfo.meshInfo[i].uvs2;
                     //m_subTextObjects[i].mesh.uv4 = m_textInfo.meshInfo[i].uvs4;
                     m_subTextObjects[i].mesh.colors32 = m_textInfo.meshInfo[i].colors32;
-                    m_subTextObjects[i].mesh.normals = m_textInfo.meshInfo[i].normals;
-                    m_subTextObjects[i].mesh.tangents = m_textInfo.meshInfo[i].tangents;
-
+                    if (HasShaderPlusFlag)
+                    {
+                        m_subTextObjects[i].mesh.normals = m_textInfo.meshInfo[i].normals;
+                        m_subTextObjects[i].mesh.tangents = m_textInfo.meshInfo[i].tangents;    
+                    }
+                    
                     m_subTextObjects[i].mesh.RecalculateBounds();
 
                     // Update the collider on the sub text object

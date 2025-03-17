@@ -147,6 +147,8 @@ namespace TMPro
 
             if (m_OnDirtyMaterialCallback != null)
                 m_OnDirtyMaterialCallback();
+            
+            UpdateShaderPlusFlag();
         }
 
 

@@ -246,6 +246,8 @@ namespace TMPro
             //m_isMaterialDirty = true;
             UpdateMaterial();
             //TMP_UpdateManager.RegisterTextElementForGraphicRebuild(this);
+            
+            UpdateShaderPlusFlag();
         }
 
 

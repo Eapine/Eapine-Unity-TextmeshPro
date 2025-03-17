@@ -8564,5 +8564,29 @@ namespace TMPro
 
             return false;
         }
+
+        protected bool m_HasShaderPlusFlag = false;
+        private Shader m_LastCheckShader = null;
+        //检查当前Shader 是否支持 Plus功能
+        protected void UpdateShaderPlusFlag()
+        {
+            if (m_sharedMaterial == null || m_sharedMaterial.shader == null)
+            {
+                m_LastCheckShader = null;
+                m_HasShaderPlusFlag = false;
+            }
+            
+            if (m_sharedMaterial.shader != m_LastCheckShader)
+            {
+                Debug.LogError("UpdateShaderPlusFlag");
+                m_LastCheckShader = m_sharedMaterial.shader;
+                m_HasShaderPlusFlag = m_LastCheckShader.name.EndsWith("Plus");
+            }
+        }
+
+        public bool HasShaderPlusFlag
+        {
+            get { return m_HasShaderPlusFlag; }
+        }
     }
 }

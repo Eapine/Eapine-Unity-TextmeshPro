@@ -811,49 +811,62 @@ namespace TMPro.EditorUtilities
             {
                 m_HavePropertiesChanged = true;
             }
+
+            EditorGUILayout.BeginVertical("box");
+            {
+                EditorGUILayout.LabelField("Plus Functions", EditorStyles.boldLabel);
+
+                if (m_TextComponent.HasShaderPlusFlag)
+                {
+                    EditorGUI.BeginChangeCheck();
+                    EditorGUILayout.PropertyField(m_EnableOutlineProp, k_OutlineEnableLabel);
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        m_HavePropertiesChanged = true;
+                    }
+
+                    if (m_EnableOutlineProp.boolValue && m_TextComponent.HasShaderPlusFlag)
+                    {
+                        EditorGUI.indentLevel += 1;
+
+                        EditorGUI.BeginChangeCheck();
+                        EditorGUILayout.PropertyField(m_TextOutlineColorProp, k_OutlineColorLabel);
+                        if (EditorGUI.EndChangeCheck())
+                        {
+                            m_HavePropertiesChanged = true;
+                        }
+
+                        EditorGUI.BeginChangeCheck();
+                        EditorGUILayout.PropertyField(m_TextOutlineThicknessProp, k_OutlineThicknessLabel);
+                        if (EditorGUI.EndChangeCheck())
+                        {
+                            m_HavePropertiesChanged = true;
+                        }
+
+                        EditorGUI.BeginChangeCheck();
+                        EditorGUILayout.PropertyField(m_TextOutlineSoftnessProp, k_OutlineSoftnessLabel);
+                        if (EditorGUI.EndChangeCheck())
+                        {
+                            m_HavePropertiesChanged = true;
+                        }
+
+                        EditorGUI.BeginChangeCheck();
+                        EditorGUILayout.PropertyField(m_TextOutlineDilateProp, k_OutlineDilateLabel);
+                        if (EditorGUI.EndChangeCheck())
+                        {
+                            m_HavePropertiesChanged = true;
+                        }
+
+                        EditorGUI.indentLevel -= 1;
+                    }
+                }
+                else
+                {
+                    EditorGUILayout.HelpBox("Plus Functions require shader's name end with \"Plus\". The mesh's normal and tangent data will be overwritten", MessageType.Info);
+                }
+            }
+            EditorGUILayout.EndVertical();
             
-            EditorGUI.BeginChangeCheck();
-            EditorGUILayout.PropertyField(m_EnableOutlineProp, k_OutlineEnableLabel);
-            if (EditorGUI.EndChangeCheck())
-            {
-                m_HavePropertiesChanged = true;
-            }
-
-            if (m_EnableOutlineProp.boolValue)
-            {
-                EditorGUI.indentLevel += 1;
-
-                EditorGUI.BeginChangeCheck();
-                EditorGUILayout.PropertyField(m_TextOutlineColorProp, k_OutlineColorLabel);
-                if (EditorGUI.EndChangeCheck())
-                {
-                    m_HavePropertiesChanged = true;
-                }
-
-                EditorGUI.BeginChangeCheck();
-                EditorGUILayout.PropertyField(m_TextOutlineThicknessProp, k_OutlineThicknessLabel);
-                if (EditorGUI.EndChangeCheck())
-                {
-                    m_HavePropertiesChanged = true;
-                }
-
-                EditorGUI.BeginChangeCheck();
-                EditorGUILayout.PropertyField(m_TextOutlineSoftnessProp, k_OutlineSoftnessLabel);
-                if (EditorGUI.EndChangeCheck())
-                {
-                    m_HavePropertiesChanged = true;
-                }
-
-                EditorGUI.BeginChangeCheck();
-                EditorGUILayout.PropertyField(m_TextOutlineDilateProp, k_OutlineDilateLabel);
-                if (EditorGUI.EndChangeCheck())
-                {
-                    m_HavePropertiesChanged = true;
-                }
-
-                EditorGUI.indentLevel -= 1;
-            }
-
             EditorGUI.BeginChangeCheck();
             EditorGUILayout.PropertyField(m_EnableVertexGradientProp, k_ColorGradientLabel);
             if (EditorGUI.EndChangeCheck())
