@@ -130,10 +130,11 @@ SubShader {
         struct vertex_t {
             UNITY_VERTEX_INPUT_INSTANCE_ID
             float4	position        : POSITION;
-            float3	normal          : NORMAL;
+            float3	normal          : NORMAL;           // Outline Thickness, Outline Softness, FaceDilate
+            float4	tangent			: TANGENT;			// OutlineColor
             float4	color           : COLOR;
-            float2	texcoord0       : TEXCOORD0;
-            float2	texcoord1       : TEXCOORD1;
+            float2	texcoord0       : TEXCOORD0;        // AtlasUV
+            float2	texcoord1       : TEXCOORD1;        // tiling and offset, bold
         };
 
 
@@ -152,6 +153,8 @@ SubShader {
             float4	underlayColor   : COLOR1;
         #endif
             float4 textures         : TEXCOORD5;
+            float3	outlineParam	: TEXCOORD6;		// Thickness, Softness, ScaleRatioA
+			fixed4	outlineColor	: COLOR2;           // OutlineColor
         };
 
         // Used by Unity internally to handle Texture Tiling and Offset.
@@ -179,8 +182,12 @@ SubShader {
 
             float4 vPosition = UnityObjectToClipPos(vert);
 
+            float outlineWidth = input.normal.x;
+			float outlineSoftness = input.normal.y;
+			float faceDilate = input.normal.z;
+			float scaleRatioA = 1;// c# 传入 _ScaleRatioA(ID_ScaleRatio_A), 用 1 效果差不多
             float weight = lerp(_WeightNormal, _WeightBold, bold) / 4.0;
-            weight = (weight + _FaceDilate) * _ScaleRatioA * 0.5;
+            weight = (weight + faceDilate) * scaleRatioA * 0.5;
 
         #if (UNDERLAY_ON || UNDERLAY_INNER)
             float4 underlayColor = _UnderlayColor;
@@ -215,7 +222,8 @@ SubShader {
             output.underlayColor = underlayColor;
         #endif
             output.textures = float4(faceUV, outlineUV);
-
+            output.outlineParam = float3(outlineWidth, outlineSoftness, scaleRatioA);
+			output.outlineColor = input.tangent;
             return output;
         }
 
@@ -234,11 +242,15 @@ SubShader {
             float bias = (.5 - weight) + (.5 / scale);
             float sd = (bias - c) * scale;
 
-            float outline = (_OutlineWidth * _ScaleRatioA) * scale;
-            float softness = (_OutlineSoftness * _ScaleRatioA) * scale;
+            float outlineWidth = input.outlineParam.x;
+			float outlineSoftness = input.outlineParam.y;
+			float scaleRatioA = input.outlineParam.z;
+            
+            float outline = (outlineWidth * scaleRatioA) * scale;
+            float softness = (outlineSoftness * scaleRatioA) * scale;
 
             half4 faceColor = _FaceColor;
-            half4 outlineColor = _OutlineColor;
+            half4 outlineColor = input.outlineColor;
 
             faceColor.rgb *= input.color.rgb;
 
