@@ -33,10 +33,10 @@ namespace TMPro
 
         protected override void OnEnable()
         {
-            if (base.font != null)
+            if (m_fontAsset != null)
             {
-                Debug.LogWarning($"{name} has default font {font.name}");
-                base.font = null;//避免序列化
+                Debug.LogWarning($"{name} has default font {m_fontAsset.name}");
+                m_fontAsset = null;//避免序列化
             }
 
             if (string.IsNullOrEmpty(FontNickName))
@@ -165,33 +165,11 @@ namespace TMPro
             TryAddFontInEditor();
 #endif
 
-            if (m_runtimeFontAsset == null)
+            if (font == null)
             {
                 return;
             }
-
-            //-----------------------------------------------------------------------------------------------------
-
-            // Read font definition if needed.
-            if (m_runtimeFontAsset.characterLookupTable == null)
-                m_runtimeFontAsset.ReadFontAssetDefinition();
-
-            // If font atlas texture doesn't match the assigned material font atlas, switch back to default material specified in the Font Asset.
-            if (m_sharedMaterial == null || m_sharedMaterial.GetTexture(ShaderUtilities.ID_MainTex) == null || m_runtimeFontAsset.atlasTexture.GetInstanceID() != m_sharedMaterial.GetTexture(ShaderUtilities.ID_MainTex).GetInstanceID())
-            {
-                if (m_runtimeFontAsset.material == null)
-                    Debug.LogWarning("The Font Atlas Texture of the Font Asset " + m_runtimeFontAsset.name + " assigned to " + gameObject.name + " is missing.", this);
-                else
-                    m_sharedMaterial = m_runtimeFontAsset.material;
-            }
-
-
-            // Find and cache Underline & Ellipsis characters.
-            GetSpecialCharacters(m_runtimeFontAsset);
-
-            m_padding = GetPaddingForMaterial();
-
-            SetMaterialDirty();
+            base.LoadFontAsset();
         }
 
 #if UNITY_EDITOR

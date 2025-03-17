@@ -8578,7 +8578,6 @@ namespace TMPro
             
             if (m_sharedMaterial.shader != m_LastCheckShader)
             {
-                Debug.LogError("UpdateShaderPlusFlag");
                 m_LastCheckShader = m_sharedMaterial.shader;
                 m_HasShaderPlusFlag = m_LastCheckShader.name.EndsWith("Plus");
             }

@@ -527,25 +527,28 @@ namespace TMPro.EditorUtilities
             //EditorGUI.indentLevel -= 1;
         }
 
-        void DrawFont()
+        protected virtual void DrawFont(bool isRuntimeFontAsset = false)
         {
             bool isFontAssetDirty = false;
 
             // FONT ASSET
-            EditorGUI.BeginChangeCheck();
-            EditorGUILayout.PropertyField(m_FontAssetProp, k_FontAssetLabel);
-            if (EditorGUI.EndChangeCheck())
+            if (!isRuntimeFontAsset || m_FontAssetProp.objectReferenceValue != null)
             {
-                m_HavePropertiesChanged = true;
-                m_HasFontAssetChangedProp.boolValue = true;
+                EditorGUI.BeginChangeCheck();
+                EditorGUILayout.PropertyField(m_FontAssetProp, k_FontAssetLabel);
+                if (EditorGUI.EndChangeCheck())
+                {
+                    m_HavePropertiesChanged = true;
+                    m_HasFontAssetChangedProp.boolValue = true;
 
-                // Get new Material Presets for the new font asset
-                m_MaterialPresetNames = GetMaterialPresets();
-                m_MaterialPresetSelectionIndex = 0;
+                    // Get new Material Presets for the new font asset
+                    m_MaterialPresetNames = GetMaterialPresets();
+                    m_MaterialPresetSelectionIndex = 0;
 
-                isFontAssetDirty = true;
+                    isFontAssetDirty = true;
+                }
             }
-
+            
             Rect rect;
 
             // MATERIAL PRESET

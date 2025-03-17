@@ -528,31 +528,31 @@ namespace TMPro
 
             ShaderUtilities.GetShaderPropertyIDs(); // Initialize & Get shader property IDs.
 
-            if (m_fontAsset == null)
+            if (font == null)
             {
                 if (TMP_Settings.defaultFontAsset != null)
                     m_fontAsset = TMP_Settings.defaultFontAsset;
                 else
                     m_fontAsset = Resources.Load<TMP_FontAsset>("Fonts & Materials/LiberationSans SDF");
 
-                if (m_fontAsset == null)
+                if (font == null)
                 {
                     Debug.LogWarning("The LiberationSans SDF Font Asset was not found. There is no Font Asset assigned to " + gameObject.name + ".", this);
                     return;
                 }
 
-                if (m_fontAsset.characterLookupTable == null)
+                if (font.characterLookupTable == null)
                 {
                     Debug.Log("Dictionary is Null!");
                 }
 
-                m_sharedMaterial = m_fontAsset.material;
+                m_sharedMaterial = font.material;
             }
             else
             {
                 // Read font definition if needed.
-                if (m_fontAsset.characterLookupTable == null)
-                    m_fontAsset.ReadFontAssetDefinition();
+                if (font.characterLookupTable == null)
+                    font.ReadFontAssetDefinition();
 
                 // Added for compatibility with previous releases.
                 if (m_sharedMaterial == null && m_baseMaterial != null)
@@ -562,18 +562,18 @@ namespace TMPro
                 }
 
                 // If font atlas texture doesn't match the assigned material font atlas, switch back to default material specified in the Font Asset.
-                if (m_sharedMaterial == null || m_sharedMaterial.GetTexture(ShaderUtilities.ID_MainTex) == null || m_fontAsset.atlasTexture.GetInstanceID() != m_sharedMaterial.GetTexture(ShaderUtilities.ID_MainTex).GetInstanceID())
+                if (m_sharedMaterial == null || m_sharedMaterial.GetTexture(ShaderUtilities.ID_MainTex) == null || font.atlasTexture.GetInstanceID() != m_sharedMaterial.GetTexture(ShaderUtilities.ID_MainTex).GetInstanceID())
                 {
-                    if (m_fontAsset.material == null)
-                        Debug.LogWarning("The Font Atlas Texture of the Font Asset " + m_fontAsset.name + " assigned to " + gameObject.name + " is missing.", this);
+                    if (font.material == null)
+                        Debug.LogWarning("The Font Atlas Texture of the Font Asset " + font.name + " assigned to " + gameObject.name + " is missing.", this);
                     else
-                        m_sharedMaterial = m_fontAsset.material;
+                        m_sharedMaterial = font.material;
                 }
             }
 
 
             // Find and cache Underline & Ellipsis characters.
-            GetSpecialCharacters(m_fontAsset);
+            GetSpecialCharacters(font);
 
             m_padding = GetPaddingForMaterial();
 

@@ -268,7 +268,7 @@ namespace TMPro
                 m_meshFilter.hideFlags = HideFlags.HideInInspector | HideFlags.HideAndDontSave;
 
             // Handle Font Asset changes in the inspector
-            if (m_fontAsset == null || m_hasFontAssetChanged)
+            if (font == null || m_hasFontAssetChanged)
             {
                 LoadFontAsset();
                 m_hasFontAssetChanged = false;
@@ -345,19 +345,19 @@ namespace TMPro
 
             if (m_renderer.sharedMaterial == null)
             {
-                if (m_fontAsset != null)
+                if (font != null)
                 {
-                    m_renderer.sharedMaterial = m_fontAsset.material;
-                    Debug.LogWarning("No Material was assigned to " + name + ". " + m_fontAsset.material.name + " was assigned.", this);
+                    m_renderer.sharedMaterial = font.material;
+                    Debug.LogWarning("No Material was assigned to " + name + ". " + font.material.name + " was assigned.", this);
                 }
                 else
                     Debug.LogWarning("No Font Asset assigned to " + name + ". Please assign a Font Asset.", this);
             }
 
-            // if (m_fontAsset.atlasTexture != null && m_fontAsset.atlasTexture.GetInstanceID() != m_renderer.sharedMaterial.GetTexture(ShaderUtilities.ID_MainTex).GetInstanceID())
+            // if (font.atlasTexture != null && font.atlasTexture.GetInstanceID() != m_renderer.sharedMaterial.GetTexture(ShaderUtilities.ID_MainTex).GetInstanceID())
             // {
             //     m_renderer.sharedMaterial = m_sharedMaterial;
-            //     //m_renderer.sharedMaterial = m_fontAsset.material;
+            //     //m_renderer.sharedMaterial = font.material;
             //     Debug.LogWarning("Font Asset Atlas doesn't match the Atlas in the newly assigned material. Select a matching material or a different font asset.", this);
             // }
 
@@ -479,25 +479,25 @@ namespace TMPro
 
             ShaderUtilities.GetShaderPropertyIDs(); // Initialize & Get shader property IDs.
 
-            if (m_fontAsset == null)
+            if (font == null)
             {
                 if (TMP_Settings.defaultFontAsset != null)
                     m_fontAsset =TMP_Settings.defaultFontAsset;
                 else
                     m_fontAsset = Resources.Load<TMP_FontAsset>("Fonts & Materials/LiberationSans SDF");
 
-                if (m_fontAsset == null)
+                if (font == null)
                 {
                     Debug.LogWarning("The LiberationSans SDF Font Asset was not found. There is no Font Asset assigned to " + gameObject.name + ".", this);
                     return;
                 }
 
-                if (m_fontAsset.characterLookupTable == null)
+                if (font.characterLookupTable == null)
                 {
                     Debug.Log("Dictionary is Null!");
                 }
 
-                m_sharedMaterial = m_fontAsset.material;
+                m_sharedMaterial = font.material;
                 m_sharedMaterial.SetFloat("_CullMode", 0);
                 m_sharedMaterial.SetFloat(ShaderUtilities.ShaderTag_ZTestMode, 4);
 
@@ -506,16 +506,16 @@ namespace TMPro
             }
             else
             {
-                if (m_fontAsset.characterLookupTable == null)
-                    m_fontAsset.ReadFontAssetDefinition();
+                if (font.characterLookupTable == null)
+                    font.ReadFontAssetDefinition();
 
                 // If font atlas texture doesn't match the assigned material font atlas, switch back to default material specified in the Font Asset.
-                if (m_sharedMaterial == null || m_sharedMaterial.GetTexture(ShaderUtilities.ID_MainTex) == null || m_fontAsset.atlasTexture.GetInstanceID() != m_sharedMaterial.GetTexture(ShaderUtilities.ID_MainTex).GetInstanceID())
+                if (m_sharedMaterial == null || m_sharedMaterial.GetTexture(ShaderUtilities.ID_MainTex) == null || font.atlasTexture.GetInstanceID() != m_sharedMaterial.GetTexture(ShaderUtilities.ID_MainTex).GetInstanceID())
                 {
-                    if (m_fontAsset.material == null)
-                        Debug.LogWarning("The Font Atlas Texture of the Font Asset " + m_fontAsset.name + " assigned to " + gameObject.name + " is missing.", this);
+                    if (font.material == null)
+                        Debug.LogWarning("The Font Atlas Texture of the Font Asset " + font.name + " assigned to " + gameObject.name + " is missing.", this);
                     else
-                        m_sharedMaterial = m_fontAsset.material;
+                        m_sharedMaterial = font.material;
                 }
 
                 m_sharedMaterial.SetFloat(ShaderUtilities.ShaderTag_ZTestMode, 4);
@@ -533,7 +533,7 @@ namespace TMPro
             m_isMaskingEnabled = ShaderUtilities.IsMaskingEnabled(m_sharedMaterial);
 
             // Find and cache Underline & Ellipsis characters.
-            GetSpecialCharacters(m_fontAsset);
+            GetSpecialCharacters(font);
 
             SetMaterialDirty();
         }
@@ -973,7 +973,7 @@ namespace TMPro
             m_FontWeightInternal = (m_FontStyleInternal & FontStyles.Bold) == FontStyles.Bold ? FontWeight.Bold : m_fontWeight;
             m_FontWeightStack.SetDefault(m_FontWeightInternal);
 
-            m_currentFontAsset = m_fontAsset;
+            m_currentFontAsset = font;
             m_currentMaterial = m_sharedMaterial;
             m_currentMaterialIndex = 0;
 
@@ -1194,8 +1194,8 @@ namespace TMPro
                     if (!TMP_Settings.warningsDisabled)
                     {
                         string formattedWarning = srcGlyph > 0xFFFF
-                            ? string.Format("The character with Unicode value \\U{0:X8} was not found in the [{1}] font asset or any potential fallbacks. It was replaced by Unicode character \\u{2:X4} in text object [{3}].", srcGlyph, m_fontAsset.name, character.unicode, this.name)
-                            : string.Format("The character with Unicode value \\u{0:X4} was not found in the [{1}] font asset or any potential fallbacks. It was replaced by Unicode character \\u{2:X4} in text object [{3}].", srcGlyph, m_fontAsset.name, character.unicode, this.name);
+                            ? string.Format("The character with Unicode value \\U{0:X8} was not found in the [{1}] font asset or any potential fallbacks. It was replaced by Unicode character \\u{2:X4} in text object [{3}].", srcGlyph, font.name, character.unicode, this.name)
+                            : string.Format("The character with Unicode value \\u{0:X4} was not found in the [{1}] font asset or any potential fallbacks. It was replaced by Unicode character \\u{2:X4} in text object [{3}].", srcGlyph, font.name, character.unicode, this.name);
 
                         Debug.LogWarning(formattedWarning, this);
                     }
@@ -1243,7 +1243,7 @@ namespace TMPro
                     continue;
                 }
 
-                if (isUsingFallbackOrAlternativeTypeface && m_currentFontAsset.instanceID != m_fontAsset.instanceID)
+                if (isUsingFallbackOrAlternativeTypeface && m_currentFontAsset.instanceID != font.instanceID)
                 {
                     // Create Fallback material instance matching current material preset if necessary
                     if (TMP_Settings.matchMaterialPreset)
@@ -1509,7 +1509,7 @@ namespace TMPro
                 return;
 
             // Check if we have a font asset assigned. Return if we don't because no one likes to see purple squares on screen.
-            if (m_fontAsset == null)
+            if (font == null)
             {
                 Debug.LogWarning("Please assign a Font Asset to this " + transform.name + " gameobject.", this);
                 return;
@@ -1574,7 +1574,7 @@ namespace TMPro
             k_GenerateTextMarker.Begin();
 
             // Early exit if no font asset was assigned. This should not be needed since LiberationSans SDF will be assigned by default.
-            if (m_fontAsset == null || m_fontAsset.characterLookupTable == null)
+            if (font == null || font.characterLookupTable == null)
             {
                 Debug.LogWarning("Can't Generate Mesh! No Font Asset has been assigned to Object ID: " + this.GetInstanceID());
                 m_IsAutoSizePointSizeSet = true;
@@ -1602,7 +1602,7 @@ namespace TMPro
                 return;
             }
 
-            m_currentFontAsset = m_fontAsset;
+            m_currentFontAsset = font;
             m_currentMaterial = m_sharedMaterial;
             m_currentMaterialIndex = 0;
             m_materialReferenceStack.SetDefault(new MaterialReference(m_currentMaterialIndex, m_currentFontAsset, null, m_currentMaterial, m_padding));
@@ -1618,7 +1618,7 @@ namespace TMPro
 
             // Calculate the scale of the font based on selected font size and sampling point size.
             // baseScale is calculated using the font asset assigned to the text object.
-            float baseScale = (m_fontSize / m_fontAsset.m_FaceInfo.pointSize * m_fontAsset.m_FaceInfo.scale * (m_isOrthographic ? 1 : 0.1f));
+            float baseScale = (m_fontSize / font.m_FaceInfo.pointSize * font.m_FaceInfo.scale * (m_isOrthographic ? 1 : 0.1f));
             float currentElementScale = baseScale;
             float currentEmScale = m_fontSize * 0.01f * (m_isOrthographic ? 1 : 0.1f);
             m_fontScaleMultiplier = 1;
