@@ -68,7 +68,9 @@ namespace TMPro.EditorUtilities
 
             EndPanel();
 
-            s_Outline = m_Material.HasProperty(ShaderUtilities.ID_OutlineTex) ? BeginPanel("Outline", s_Outline) : BeginPanel("Outline", s_OutlineFeature, s_Outline);
+            bool hasOutlineTex = m_Material.HasProperty(ShaderUtilities.ID_OutlineTex);
+            bool hasOutlineKeyword = m_Material.shader.keywordSpace.keywordNames.Contains(s_OutlineFeature.keywords[0]);
+            s_Outline = (hasOutlineTex || !hasOutlineKeyword) ? BeginPanel("Outline", s_Outline) : BeginPanel("Outline", s_OutlineFeature, s_Outline);
             if (s_Outline)
             {
                 DoOutlinePanel();

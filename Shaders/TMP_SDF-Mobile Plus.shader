@@ -83,7 +83,6 @@ SubShader {
 		CGPROGRAM
 		#pragma vertex VertShader
 		#pragma fragment PixShader
-		#pragma shader_feature __ OUTLINE_ON
 		#pragma shader_feature __ UNDERLAY_ON UNDERLAY_INNER
 
 		#pragma multi_compile __ UNITY_UI_CLIP_RECT
@@ -96,10 +95,11 @@ SubShader {
 		struct vertex_t {
 			UNITY_VERTEX_INPUT_INSTANCE_ID
 			float4	vertex			: POSITION;
-			float3	normal			: NORMAL;
+			float3	normal			: NORMAL;				// Outline Thickness, Outline Softness, FaceDilate
+			float4	tangent			: TANGENT;				// OutlineColor
 			fixed4	color			: COLOR;
-			float2	texcoord0		: TEXCOORD0;
-			float2	texcoord1		: TEXCOORD1;
+			float2	texcoord0		: TEXCOORD0;			// AtlasUV
+			float2	texcoord1		: TEXCOORD1;			// tiling and offset, bold
 		};
 
 		struct pixel_t {
@@ -142,14 +142,18 @@ SubShader {
 			//if (UNITY_MATRIX_P[3][3] == 0) scale = lerp(abs(scale) * (1 - _PerspectiveFilter), scale, abs(dot(UnityObjectToWorldNormal(input.normal.xyz), normalize(WorldSpaceViewDir(vert)))));
 			if (UNITY_MATRIX_P[3][3] == 0) scale = lerp(abs(scale) * (1 - _PerspectiveFilter), scale, abs(dot(UnityObjectToWorldNormal(fixed3(0,0,-1)), normalize(WorldSpaceViewDir(vert)))));
 
+			float outlineWidth = input.normal.x;
+			float outlineSoftness = input.normal.y;
+			float faceDilate = input.normal.z;
+			float scaleRatioA = 1;// c# 传入 _ScaleRatioA(ID_ScaleRatio_A), 用 1 效果差不多
 			float weight = lerp(_WeightNormal, _WeightBold, bold) / 4.0;
-			weight = (weight + _FaceDilate) * _ScaleRatioA * 0.5;
+			weight = (weight + faceDilate) * scaleRatioA * 0.5;
 
 			float layerScale = scale;
 
-			scale /= 1 + (_OutlineSoftness * _ScaleRatioA * scale);
+			scale /= 1 + (outlineSoftness * scaleRatioA * scale);
 			float bias = (0.5 - weight) * scale - 0.5;
-			float outline = _OutlineWidth * _ScaleRatioA * 0.5 * scale;
+			float outline = outlineWidth * scaleRatioA * 0.5 * scale;
 
 			float opacity = input.color.a;
 			#if (UNDERLAY_ON | UNDERLAY_INNER)
@@ -159,7 +163,7 @@ SubShader {
 			fixed4 faceColor = fixed4(input.color.rgb, opacity) * _FaceColor;
 			faceColor.rgb *= faceColor.a;
 
-			fixed4 outlineColor = _OutlineColor;
+			fixed4 outlineColor = input.tangent;
 			outlineColor.a *= opacity;
 			outlineColor.rgb *= outlineColor.a;
 			outlineColor = lerp(faceColor, outlineColor, sqrt(min(1.0, (outline * 2))));
@@ -201,10 +205,8 @@ SubShader {
 			half d = tex2D(_MainTex, input.texcoord0.xy).a * input.param.x;
 			half4 c = input.faceColor * saturate(d - input.param.w);
 
-			#ifdef OUTLINE_ON
 			c = lerp(input.outlineColor, input.faceColor, saturate(d - input.param.z));
 			c *= saturate(d - input.param.y);
-			#endif
 
 			#if UNDERLAY_ON
 			d = tex2D(_MainTex, input.texcoord1.xy).a * input.underlayParam.x;
