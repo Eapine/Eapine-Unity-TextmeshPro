@@ -29,7 +29,7 @@ namespace TMPro.EditorUtilities
 
                 EditorGUI.BeginDisabled(true);
                 {
-                    EditorGUILayout.ObjectField("Settings", TMP_RuntimeFontSettings.instance, typeof(TMP_RuntimeFontSettings), false);
+                    EditorGUILayout.ObjectField("Settings", TMP_RuntimeFontSettings.Instance, typeof(TMP_RuntimeFontSettings), false);
                     EditorGUILayout.TextField("NickName", TMP_RuntimeFontSettings.GetNickNameByIndex(m_FontIndexProp.intValue));
                     EditorGUILayout.ObjectField("RuntimeFont", TMP_RuntimeFontUGUI.GetFontAsset(m_FontIndexProp.intValue), typeof(TMP_FontAsset), false);
                 }

@@ -189,7 +189,17 @@ namespace TMPro
 
                 if (!m_FontAssetDict.ContainsKey(FontNickName))
                 {
-                    Object fontData = AssetDatabase.LoadAssetAtPath<Object>(FontPath);
+                    Object fontData = null;
+                    bool isBuiltin = !FontPath.StartsWith("Assets/", System.StringComparison.Ordinal);
+                    if (isBuiltin)
+                    {
+                        fontData = Resources.Load<Object>(FontPath);
+                    }
+                    else
+                    {
+                        fontData = AssetDatabase.LoadAssetAtPath<Object>(FontPath);
+                    }
+                    
                     if (fontData == null)
                     {
                         Debug.LogError($"{FontPath}");

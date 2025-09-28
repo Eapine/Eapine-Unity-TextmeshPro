@@ -25,23 +25,33 @@ namespace TMPro
         /// </summary>
         public static List<FontConfig> FontNickNameAndPath
         {
-            get { return instance? instance.m_fontNickNameAndPath : null; }
+            get { return Instance? Instance.m_fontNickNameAndPath : null; }
         }
         [SerializeField]
         private List<FontConfig> m_fontNickNameAndPath;
 
+        /// <summary>
+        /// 根据索引取得字体昵称。
+        /// </summary>
+        /// <param name="index">索引。</param>
+        /// <returns>字体昵称。</returns>
         public static string GetNickNameByIndex(int index)
         {
-            if (FontNickNameAndPath == null || index >= FontNickNameAndPath.Count)
+            if (FontNickNameAndPath == null || index < 0 || index >= FontNickNameAndPath.Count)
             {
                 return null;
             }
             return FontNickNameAndPath[index].nickName;
         }
 
+        /// <summary>
+        /// 根据索引取得字体路径。
+        /// </summary>
+        /// <param name="index">索引。</param>
+        /// <returns>字体路径。</returns>
         public static string GetPathByIndex(int index)
         {
-            if (index >= FontNickNameAndPath.Count)
+            if (FontNickNameAndPath == null || index < 0 || index >= FontNickNameAndPath.Count)
             {
                 return null;
             }
@@ -49,9 +59,45 @@ namespace TMPro
         }
 
         /// <summary>
+        /// 根据昵称取得字体路径。
+        /// </summary>
+        /// <param name="nickName">昵称。</param>
+        /// <returns>字体路径。</returns>
+        public static string GetPathByNickName(string nickName)
+        {
+            if (FontNickNameAndPath == null || nickName == null)
+            {
+                return null;
+            }
+
+            foreach (FontConfig fontConfig in FontNickNameAndPath)
+            {
+                if (fontConfig.nickName == nickName)
+                {
+                    return fontConfig.path;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// 取得字体数量。
+        /// </summary>
+        /// <returns></returns>
+        public static int GetLength()
+        {
+            if (FontNickNameAndPath == null)
+            {
+                return 0;
+            }
+            return FontNickNameAndPath.Count;
+        }
+
+        /// <summary>
         /// Get a singleton instance of the settings class.
         /// </summary>
-        public static TMP_RuntimeFontSettings instance
+        public static TMP_RuntimeFontSettings Instance
         {
             get
             {
@@ -98,9 +144,9 @@ namespace TMPro
         /// <returns></returns>
         public static TMP_RuntimeFontSettings GetSettings()
         {
-            if (instance == null) return null;
+            if (Instance == null) return null;
 
-            return instance;
+            return Instance;
         }
         
 #if UNITY_EDITOR
