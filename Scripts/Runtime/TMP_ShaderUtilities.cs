@@ -686,8 +686,6 @@ namespace TMPro
                 faceSoftness = text.textOutlineSoftness * scaleRatio_A;
                 outlineThickness = text.textOutlineThickness * scaleRatio_A;    
             }
-
-            Debug.LogError("faceDilate: " + faceDilate);
             
             uniformPadding = outlineThickness + faceSoftness + faceDilate;
 
