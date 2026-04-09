@@ -4304,12 +4304,12 @@ namespace TMPro
                 m_mesh.vertices = m_textInfo.meshInfo[0].vertices;
                 m_mesh.uv = m_textInfo.meshInfo[0].uvs0;
                 m_mesh.uv2 = m_textInfo.meshInfo[0].uvs2;
+                m_mesh.uv3 = m_textInfo.meshInfo[0].uvs3;
                 m_mesh.colors32 = m_textInfo.meshInfo[0].colors32;
                 if (HasShaderPlusFlag)
                 {
                     m_mesh.normals = m_textInfo.meshInfo[0].normals;
                     m_mesh.tangents = m_textInfo.meshInfo[0].tangents;
-                    m_mesh.uv3 = m_textInfo.meshInfo[0].uvs3;
                 }
 
                 // Compute Bounds for the mesh. Manual computation is more efficient then using Mesh.RecalcualteBounds.
@@ -4330,12 +4330,12 @@ namespace TMPro
                     m_subTextObjects[i].mesh.vertices = m_textInfo.meshInfo[i].vertices;
                     m_subTextObjects[i].mesh.uv = m_textInfo.meshInfo[i].uvs0;
                     m_subTextObjects[i].mesh.uv2 = m_textInfo.meshInfo[i].uvs2;
+                    m_subTextObjects[i].mesh.uv3 = m_textInfo.meshInfo[i].uvs3;
                     m_subTextObjects[i].mesh.colors32 = m_textInfo.meshInfo[i].colors32;
                     if (HasShaderPlusFlag)
                     {
                         m_subTextObjects[i].mesh.normals = m_textInfo.meshInfo[i].normals;
                         m_subTextObjects[i].mesh.tangents = m_textInfo.meshInfo[i].tangents;
-                        m_subTextObjects[i].mesh.uv3 = m_textInfo.meshInfo[i].uvs3;
                     }
 
                     m_subTextObjects[i].mesh.RecalculateBounds();
