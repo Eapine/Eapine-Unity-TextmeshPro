@@ -7,15 +7,15 @@ namespace TMPro
     public struct TMP_Vertex
     {
         public Vector3 position;
-        public Vector2 uv;
-        public Vector2 uv2;
-        public Vector2 uv4;
+        public Vector2 uv;      // AtlasUV
+        public Vector2 uv2;     // tiling and offset, bold
+        public Vector2 uv3;     // RatiosA, RatiosB
         public Color32 color;
 
         public static TMP_Vertex zero { get { return k_Zero; } }
 
-        public Vector3 normal;
-        public Vector4 tangent;
+        public Vector3 normal;  // Outline Thickness, Outline Softness, FaceDilate
+        public Vector4 tangent; // OutlineColor
 
         static readonly TMP_Vertex k_Zero = new TMP_Vertex();
     }

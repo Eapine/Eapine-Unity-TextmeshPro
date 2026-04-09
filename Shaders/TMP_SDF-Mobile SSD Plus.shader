@@ -103,6 +103,7 @@ SubShader {
 		    float4	color			: COLOR;
 		    float2	texcoord0		: TEXCOORD0;			// AtlasUV
 		    float2	texcoord1		: TEXCOORD1;			// tiling and offset, bold
+			float2	texcoord2		: TEXCOORD2;			// RatiosA, RatiosB
 		};
 
 		struct pixel_t {
@@ -146,7 +147,7 @@ SubShader {
 			float outlineWidth = input.normal.x;
 			float outlineSoftness = input.normal.y;
 			float faceDilate = input.normal.z;
-			float scaleRatioA = 1;// c# 传入 _ScaleRatioA(ID_ScaleRatio_A), 用 1 效果差不多
+			float scaleRatioA = input.texcoord2.x;
 		    float weight = lerp(_WeightNormal, _WeightBold, bold) / 4.0;
 		    weight = (weight + faceDilate) * scaleRatioA * 0.5;
 

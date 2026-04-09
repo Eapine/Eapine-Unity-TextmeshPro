@@ -14,7 +14,7 @@ namespace TMPro
         Vertices = 0x1,
         Uv0 = 0x2,
         Uv2 = 0x4,
-        Uv4 = 0x8,
+        Uv3 = 0x8,
         Colors32 = 0x10,
         Normals = 0x20,
         Tangents = 0x40,

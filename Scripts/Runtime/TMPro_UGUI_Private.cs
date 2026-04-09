@@ -301,7 +301,7 @@ namespace TMPro
                 m_hasFontAssetChanged = false;
             }
 
-            m_padding = GetPaddingForMaterial();
+            m_padding = GetPadding();
             ComputeMarginSize();
 
             m_inputSource = TextInputSources.TextInputBox;
@@ -412,7 +412,7 @@ namespace TMPro
                 else if (materialID == maskingMaterialID)
                 {
                     // Update the padding
-                    GetPaddingForMaterial(mat);
+                    GetPadding(mat);
 
                     m_sharedMaterial.CopyPropertiesFromMaterial(mat);
                     m_sharedMaterial.shaderKeywords = mat.shaderKeywords;
@@ -425,7 +425,7 @@ namespace TMPro
 
             }
 
-            m_padding = GetPaddingForMaterial();
+            m_padding = GetPadding();
             m_havePropertiesChanged = true;
             SetVerticesDirty();
             //SetMaterialDirty();
@@ -481,7 +481,7 @@ namespace TMPro
 
                 m_sharedMaterial = newMaterial;
 
-                m_padding = GetPaddingForMaterial();
+                m_padding = GetPadding();
 
                 m_havePropertiesChanged = true;
                 SetVerticesDirty();
@@ -575,7 +575,7 @@ namespace TMPro
             // Find and cache Underline & Ellipsis characters.
             GetSpecialCharacters(font);
 
-            m_padding = GetPaddingForMaterial();
+            m_padding = GetPadding();
 
             SetMaterialDirty();
         }
@@ -775,7 +775,7 @@ namespace TMPro
 
             m_sharedMaterial = m_fontMaterial;
 
-            m_padding = GetPaddingForMaterial();
+            m_padding = GetPadding();
 
             m_ShouldRecalculateStencil = true;
             SetVerticesDirty();
@@ -823,7 +823,7 @@ namespace TMPro
 
             m_sharedMaterial = mat;
 
-            m_padding = GetPaddingForMaterial();
+            m_padding = GetPadding();
 
             SetMaterialDirty();
         }
@@ -877,7 +877,7 @@ namespace TMPro
                         continue;
 
                     m_sharedMaterial = m_fontSharedMaterials[i] = materials[i];
-                    m_padding = GetPaddingForMaterial(m_sharedMaterial);
+                    m_padding = GetPadding(m_sharedMaterial);
                 }
                 else
                 {
@@ -911,7 +911,7 @@ namespace TMPro
 
             thickness = Mathf.Clamp01(thickness);
             m_sharedMaterial.SetFloat(ShaderUtilities.ID_OutlineWidth, thickness);
-            m_padding = GetPaddingForMaterial();
+            m_padding = GetPadding();
         }
 
 
@@ -923,7 +923,7 @@ namespace TMPro
                 m_fontMaterial = CreateMaterialInstance(m_sharedMaterial);
 
             m_sharedMaterial = m_fontMaterial;
-            m_padding = GetPaddingForMaterial();
+            m_padding = GetPadding();
 
             m_sharedMaterial.SetColor(ShaderUtilities.ID_FaceColor, color);
         }
@@ -937,7 +937,7 @@ namespace TMPro
                 m_fontMaterial = CreateMaterialInstance(m_sharedMaterial);
 
             m_sharedMaterial = m_fontMaterial;
-            m_padding = GetPaddingForMaterial();
+            m_padding = GetPadding();
 
             m_sharedMaterial.SetColor(ShaderUtilities.ID_OutlineColor, color);
         }
@@ -4449,8 +4449,8 @@ namespace TMPro
 
                 // Must ensure the Canvas support the additional vertex attributes used by TMP.
                 // This could be optimized based on canvas render mode settings but gets complicated to handle with multiple text objects using different material presets.
-                if (m_canvas.additionalShaderChannels != (AdditionalCanvasShaderChannels)25)
-                    m_canvas.additionalShaderChannels |= (AdditionalCanvasShaderChannels)25;
+                if (m_canvas.additionalShaderChannels != (AdditionalCanvasShaderChannels)27)
+                    m_canvas.additionalShaderChannels |= (AdditionalCanvasShaderChannels)27;
 
                 // Sort the geometry of the text object if needed.
                 if (m_geometrySortingOrder != VertexSortingOrder.Normal)
@@ -4461,12 +4461,12 @@ namespace TMPro
                 m_mesh.vertices = m_textInfo.meshInfo[0].vertices;
                 m_mesh.uv = m_textInfo.meshInfo[0].uvs0;
                 m_mesh.uv2 = m_textInfo.meshInfo[0].uvs2;
-                //m_mesh.uv4 = m_textInfo.meshInfo[0].uvs4;
                 m_mesh.colors32 = m_textInfo.meshInfo[0].colors32;
                 if (HasShaderPlusFlag)
                 {
                     m_mesh.normals = m_textInfo.meshInfo[0].normals;
                     m_mesh.tangents = m_textInfo.meshInfo[0].tangents;
+                    m_mesh.uv3 = m_textInfo.meshInfo[0].uvs3;
                 }
                 
                 // Compute Bounds for the mesh. Manual computation is more efficient then using Mesh.RecalcualteBounds.
@@ -4495,12 +4495,12 @@ namespace TMPro
                     m_subTextObjects[i].mesh.vertices = m_textInfo.meshInfo[i].vertices;
                     m_subTextObjects[i].mesh.uv = m_textInfo.meshInfo[i].uvs0;
                     m_subTextObjects[i].mesh.uv2 = m_textInfo.meshInfo[i].uvs2;
-                    //m_subTextObjects[i].mesh.uv4 = m_textInfo.meshInfo[i].uvs4;
                     m_subTextObjects[i].mesh.colors32 = m_textInfo.meshInfo[i].colors32;
                     if (HasShaderPlusFlag)
                     {
                         m_subTextObjects[i].mesh.normals = m_textInfo.meshInfo[i].normals;
-                        m_subTextObjects[i].mesh.tangents = m_textInfo.meshInfo[i].tangents;    
+                        m_subTextObjects[i].mesh.tangents = m_textInfo.meshInfo[i].tangents;
+                        m_subTextObjects[i].mesh.uv3 = m_textInfo.meshInfo[i].uvs3;
                     }
                     
                     m_subTextObjects[i].mesh.RecalculateBounds();
@@ -4744,7 +4744,9 @@ namespace TMPro
             Vector3 normal = Vector3.zero;
             Vector4 tangent = Vector4.one;
             SetupNormalsAndTangents(out normal, out tangent);
-
+            Vector2 uv3 = Vector2.one;
+            SetupRatioAB(out uv3);
+            
             for (int characterIndex = 0; characterIndex < m_characterCount; characterIndex++)
             {
                 m_textInfo.characterInfo[characterIndex].vertex_BL.normal = normal;
@@ -4756,6 +4758,11 @@ namespace TMPro
                 m_textInfo.characterInfo[characterIndex].vertex_TL.tangent = tangent;
                 m_textInfo.characterInfo[characterIndex].vertex_TR.tangent = tangent;
                 m_textInfo.characterInfo[characterIndex].vertex_BR.tangent = tangent;
+                
+                m_textInfo.characterInfo[characterIndex].vertex_BL.uv3 = uv3;
+                m_textInfo.characterInfo[characterIndex].vertex_TL.uv3 = uv3;
+                m_textInfo.characterInfo[characterIndex].vertex_TR.uv3 = uv3;
+                m_textInfo.characterInfo[characterIndex].vertex_BR.uv3 = uv3;
 
                 //--------------------------------------------------------------------
                 int materialIndex = m_textInfo.characterInfo[characterIndex].materialReferenceIndex;
@@ -4774,6 +4781,14 @@ namespace TMPro
                     m_textInfo.meshInfo[materialIndex].tangents[2 + characterIndex * 4] = m_textInfo.characterInfo[characterIndex].vertex_TR.tangent;
                     m_textInfo.meshInfo[materialIndex].tangents[3 + characterIndex * 4] = m_textInfo.characterInfo[characterIndex].vertex_BR.tangent;
                 }
+                
+                if (m_textInfo.meshInfo[materialIndex].uvs3.Length > (3 + characterIndex * 4))
+                {
+                    m_textInfo.meshInfo[materialIndex].uvs3[0 + characterIndex * 4] = m_textInfo.characterInfo[characterIndex].vertex_BL.uv3;
+                    m_textInfo.meshInfo[materialIndex].uvs3[1 + characterIndex * 4] = m_textInfo.characterInfo[characterIndex].vertex_TL.uv3;
+                    m_textInfo.meshInfo[materialIndex].uvs3[2 + characterIndex * 4] = m_textInfo.characterInfo[characterIndex].vertex_TR.uv3;
+                    m_textInfo.meshInfo[materialIndex].uvs3[3 + characterIndex * 4] = m_textInfo.characterInfo[characterIndex].vertex_BR.uv3;
+                }
             }
 
             for (int i = 0; i < m_textInfo.materialCount; i++)
@@ -4782,12 +4797,14 @@ namespace TMPro
                 {
                     m_mesh.normals = m_textInfo.meshInfo[0].normals;
                     m_mesh.tangents = m_textInfo.meshInfo[0].tangents;
+                    m_mesh.uv3 = m_textInfo.meshInfo[0].uvs3;
                     m_canvasRenderer.SetMesh(m_mesh);
                 }
                 else
                 {
                     m_subTextObjects[i].mesh.normals = m_textInfo.meshInfo[i].normals;
                     m_subTextObjects[i].mesh.tangents = m_textInfo.meshInfo[i].tangents;
+                    m_subTextObjects[i].mesh.uv3 = m_textInfo.meshInfo[i].uvs3;
                     m_subTextObjects[i].canvasRenderer.SetMesh(m_subTextObjects[i].mesh);
                 }
             }

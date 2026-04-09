@@ -306,7 +306,59 @@ namespace TMPro
             }
         }
 
+        public static void UpdateShaderRatios(Material mat, TMP_Text text)
+        {
+            //Debug.Log("UpdateShaderRatios() called.");
 
+            float ratio_A = 1;
+            float ratio_B = 1;
+            float ratio_C = 1;
+
+            bool isRatioEnabled = !mat.shaderKeywords.Contains(Keyword_Ratios);
+
+            if (!mat.HasProperty(ID_GradientScale))
+                return;
+
+            // Compute Ratio A
+            float scale = mat.GetFloat(ID_GradientScale);
+            float faceDilate = text.textOutlineDilate;
+            float outlineThickness = text.textOutlineThickness;
+            float outlineSoftness = text.textOutlineSoftness;
+
+            float weight = Mathf.Max(mat.GetFloat(ID_WeightNormal), mat.GetFloat(ID_WeightBold)) / 4.0f;
+            float t = Mathf.Max(1, weight + faceDilate + outlineThickness + outlineSoftness);
+            ratio_A = isRatioEnabled ? (scale - m_clamp) / (scale * t) : 1;
+
+            text.scaleRatio_A = ratio_A;
+
+            // Compute Ratio B
+            if (mat.HasProperty(ID_GlowOffset))
+            {
+                float glowOffset = 0;//mat.GetFloat(ID_GlowOffset);
+                float glowOuter = 0;//mat.GetFloat(ID_GlowOuter);
+
+                float range = (weight + faceDilate) * (scale - m_clamp);
+                t = Mathf.Max(1, glowOffset + glowOuter);
+                ratio_B = isRatioEnabled ? Mathf.Max(0, scale - m_clamp - range) / (scale * t) : 1;
+                
+                text.scaleRatio_B = ratio_B;
+            }
+
+            // Compute Ratio C
+            if (mat.HasProperty(ID_UnderlayOffsetX))
+            {
+                float underlayOffsetX = 0;//mat.GetFloat(ID_UnderlayOffsetX);
+                float underlayOffsetY = 0;//mat.GetFloat(ID_UnderlayOffsetY);
+                float underlayDilate = 0;//mat.GetFloat(ID_UnderlayDilate);
+                float underlaySoftness = 0;//mat.GetFloat(ID_UnderlaySoftness);
+
+                float range = (weight + faceDilate) * (scale - m_clamp);
+                t = Mathf.Max(1, Mathf.Max(Mathf.Abs(underlayOffsetX), Mathf.Abs(underlayOffsetY)) + underlayDilate + underlaySoftness);
+                ratio_C = isRatioEnabled ? Mathf.Max(0, scale - m_clamp - range) / (scale * t) : 1;
+                
+                text.scaleRatio_C = ratio_C;
+            }
+        }
 
         // Function to calculate padding required for Outline Width & Dilation for proper text alignment
         public static Vector4 GetFontExtent(Material material)
@@ -579,7 +631,119 @@ namespace TMPro
             return uniformPadding + 0.25f;
         }
 
+        public static float GetPadding(Material material, TMP_Text text)
+        {
+            //Debug.Log("GetPadding() called.");
 
+            if (isInitialized == false)
+                GetShaderPropertyIDs();
+
+            // Return if Material is null
+            if (material == null) return 0;
+            
+            // Return if Text is null
+            if (text == null) return 0;
+            
+            int extraPadding = text.extraPadding ? 4 : 0;
+
+            // Check if we are using a non Distance Field Shader
+            if (material.HasProperty(ID_GradientScale) == false)
+            {
+                if (material.HasProperty(ID_Padding))
+                    extraPadding += (int)material.GetFloat(ID_Padding);
+
+                return extraPadding + 1.0f;
+            }
+
+            Vector4 padding = Vector4.zero;
+            Vector4 maxPadding = Vector4.zero;
+
+            float faceDilate = 0;
+            float faceSoftness = 0;
+            float outlineThickness = 0;
+            float scaleRatio_A = 0;
+            float scaleRatio_B = 0;
+            float scaleRatio_C = 0;
+
+            float glowOffset = 0;
+            float glowOuter = 0;
+
+            float uniformPadding = 0;
+            // Iterate through each of the assigned materials to find the max values to set the padding.
+
+            // Update Shader Ratios prior to computing padding
+            UpdateShaderRatios(material, text);
+
+            //string[] shaderKeywords = material.shaderKeywords;
+
+            scaleRatio_A = text.scaleRatio_A;
+            scaleRatio_B = text.scaleRatio_B;
+            scaleRatio_C = text.scaleRatio_C;
+            
+            if (text.enableOutline)
+            {
+                faceDilate = text.textOutlineDilate * scaleRatio_A;
+                faceSoftness = text.textOutlineSoftness * scaleRatio_A;
+                outlineThickness = text.textOutlineThickness * scaleRatio_A;    
+            }
+
+            Debug.LogError("faceDilate: " + faceDilate);
+            
+            uniformPadding = outlineThickness + faceSoftness + faceDilate;
+
+            // Glow padding contribution
+            //if (material.HasProperty(ID_GlowOffset) && shaderKeywords.Contains(Keyword_Glow)) // Generates GC
+            {
+                // glowOffset = material.GetFloat(ID_GlowOffset) * scaleRatio_B;
+                // glowOuter = material.GetFloat(ID_GlowOuter) * scaleRatio_B;
+            }
+
+            uniformPadding = Mathf.Max(uniformPadding, faceDilate + glowOffset + glowOuter);
+
+            // Underlay padding contribution
+            //if (material.HasProperty(ID_UnderlaySoftness) && shaderKeywords.Contains(Keyword_Underlay)) // Generates GC
+            {
+                // float offsetX = material.GetFloat(ID_UnderlayOffsetX) * scaleRatio_C;
+                // float offsetY = material.GetFloat(ID_UnderlayOffsetY) * scaleRatio_C;
+                // float dilate = material.GetFloat(ID_UnderlayDilate) * scaleRatio_C;
+                // float softness = material.GetFloat(ID_UnderlaySoftness) * scaleRatio_C;
+                //
+                // padding.x = Mathf.Max(padding.x, faceDilate + dilate + softness - offsetX);
+                // padding.y = Mathf.Max(padding.y, faceDilate + dilate + softness - offsetY);
+                // padding.z = Mathf.Max(padding.z, faceDilate + dilate + softness + offsetX);
+                // padding.w = Mathf.Max(padding.w, faceDilate + dilate + softness + offsetY);
+            }
+
+            padding.x = Mathf.Max(padding.x, uniformPadding);
+            padding.y = Mathf.Max(padding.y, uniformPadding);
+            padding.z = Mathf.Max(padding.z, uniformPadding);
+            padding.w = Mathf.Max(padding.w, uniformPadding);
+
+            padding.x += extraPadding;
+            padding.y += extraPadding;
+            padding.z += extraPadding;
+            padding.w += extraPadding;
+
+            padding.x = Mathf.Min(padding.x, 1);
+            padding.y = Mathf.Min(padding.y, 1);
+            padding.z = Mathf.Min(padding.z, 1);
+            padding.w = Mathf.Min(padding.w, 1);
+
+            maxPadding.x = maxPadding.x < padding.x ? padding.x : maxPadding.x;
+            maxPadding.y = maxPadding.y < padding.y ? padding.y : maxPadding.y;
+            maxPadding.z = maxPadding.z < padding.z ? padding.z : maxPadding.z;
+            maxPadding.w = maxPadding.w < padding.w ? padding.w : maxPadding.w;
+
+            float gradientScale = material.GetFloat(ID_GradientScale);
+            padding *= gradientScale;
+
+            // Set UniformPadding to the maximum value of any of its components.
+            uniformPadding = Mathf.Max(padding.x, padding.y);
+            uniformPadding = Mathf.Max(padding.z, uniformPadding);
+            uniformPadding = Mathf.Max(padding.w, uniformPadding);
+
+            return uniformPadding + 1.25f;
+        }
     }
 
 }

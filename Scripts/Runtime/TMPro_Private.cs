@@ -274,7 +274,7 @@ namespace TMPro
                 m_hasFontAssetChanged = false;
             }
 
-            m_padding = GetPaddingForMaterial();
+            m_padding = GetPadding();
             ComputeMarginSize();
 
             m_inputSource = TextInputSources.TextInputBox;
@@ -367,7 +367,7 @@ namespace TMPro
                 m_sharedMaterial = m_renderer.sharedMaterial;
             }
 
-            m_padding = GetPaddingForMaterial();
+            m_padding = GetPadding();
             //m_sharedMaterialHashCode = TMP_TextUtilities.GetSimpleHashCode(m_sharedMaterial.name);
 
             UpdateMask();
@@ -404,7 +404,7 @@ namespace TMPro
                 //Debug.Log("Undo / Redo Event Received by Object ID:" + GetInstanceID());
                 m_havePropertiesChanged = true;
 
-                m_padding = GetPaddingForMaterial();
+                m_padding = GetPadding();
                 ComputeMarginSize(); // Verify this change
 
                 SetVerticesDirty();
@@ -429,7 +429,7 @@ namespace TMPro
 
                 m_sharedMaterial = newMaterial;
 
-                m_padding = GetPaddingForMaterial();
+                m_padding = GetPadding();
                 m_havePropertiesChanged = true;
 
                 SetVerticesDirty();
@@ -529,7 +529,7 @@ namespace TMPro
 
             }
 
-            m_padding = GetPaddingForMaterial();
+            m_padding = GetPadding();
             m_isMaskingEnabled = ShaderUtilities.IsMaskingEnabled(m_sharedMaterial);
 
             // Find and cache Underline & Ellipsis characters.
@@ -715,7 +715,7 @@ namespace TMPro
 
             m_sharedMaterial = m_fontMaterial;
 
-            m_padding = GetPaddingForMaterial();
+            m_padding = GetPadding();
 
             SetVerticesDirty();
             SetMaterialDirty();
@@ -762,7 +762,7 @@ namespace TMPro
 
             m_sharedMaterial = mat;
 
-            m_padding = GetPaddingForMaterial();
+            m_padding = GetPadding();
 
             SetMaterialDirty();
         }
@@ -818,7 +818,7 @@ namespace TMPro
                         continue;
 
                     m_sharedMaterial = m_fontSharedMaterials[i] = materials[i];
-                    m_padding = GetPaddingForMaterial(m_sharedMaterial);
+                    m_padding = GetPadding(m_sharedMaterial);
                 }
                 else
                 {
@@ -845,7 +845,7 @@ namespace TMPro
 
             m_fontMaterial = m_renderer.material;
             m_sharedMaterial = m_fontMaterial;
-            m_padding = GetPaddingForMaterial();
+            m_padding = GetPadding();
         }
 
 
@@ -4304,14 +4304,14 @@ namespace TMPro
                 m_mesh.vertices = m_textInfo.meshInfo[0].vertices;
                 m_mesh.uv = m_textInfo.meshInfo[0].uvs0;
                 m_mesh.uv2 = m_textInfo.meshInfo[0].uvs2;
-                //m_mesh.uv4 = m_textInfo.meshInfo[0].uvs4;
                 m_mesh.colors32 = m_textInfo.meshInfo[0].colors32;
                 if (HasShaderPlusFlag)
                 {
                     m_mesh.normals = m_textInfo.meshInfo[0].normals;
-                    m_mesh.tangents = m_textInfo.meshInfo[0].tangents;    
+                    m_mesh.tangents = m_textInfo.meshInfo[0].tangents;
+                    m_mesh.uv3 = m_textInfo.meshInfo[0].uvs3;
                 }
-                
+
                 // Compute Bounds for the mesh. Manual computation is more efficient then using Mesh.RecalcualteBounds.
                 m_mesh.RecalculateBounds();
                 //m_mesh.bounds = new Bounds(new Vector3((m_meshExtents.max.x + m_meshExtents.min.x) / 2, (m_meshExtents.max.y + m_meshExtents.min.y) / 2, 0) + offset, new Vector3(m_meshExtents.max.x - m_meshExtents.min.x, m_meshExtents.max.y - m_meshExtents.min.y, 0));
@@ -4330,14 +4330,14 @@ namespace TMPro
                     m_subTextObjects[i].mesh.vertices = m_textInfo.meshInfo[i].vertices;
                     m_subTextObjects[i].mesh.uv = m_textInfo.meshInfo[i].uvs0;
                     m_subTextObjects[i].mesh.uv2 = m_textInfo.meshInfo[i].uvs2;
-                    //m_subTextObjects[i].mesh.uv4 = m_textInfo.meshInfo[i].uvs4;
                     m_subTextObjects[i].mesh.colors32 = m_textInfo.meshInfo[i].colors32;
                     if (HasShaderPlusFlag)
                     {
                         m_subTextObjects[i].mesh.normals = m_textInfo.meshInfo[i].normals;
-                        m_subTextObjects[i].mesh.tangents = m_textInfo.meshInfo[i].tangents;    
+                        m_subTextObjects[i].mesh.tangents = m_textInfo.meshInfo[i].tangents;
+                        m_subTextObjects[i].mesh.uv3 = m_textInfo.meshInfo[i].uvs3;
                     }
-                    
+
                     m_subTextObjects[i].mesh.RecalculateBounds();
 
                     // Update the collider on the sub text object

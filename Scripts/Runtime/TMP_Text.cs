@@ -224,7 +224,7 @@ namespace TMPro
 
                 m_sharedMaterial = value;
 
-                m_padding = GetPaddingForMaterial();
+                m_padding = GetPadding();
                 m_havePropertiesChanged = true;
 
                 SetVerticesDirty();
@@ -315,6 +315,27 @@ namespace TMPro
         }
         [SerializeField][Range(-1f, 1f)]
         protected float m_textOutlineDilate = 0.1f;
+
+        internal float scaleRatio_A
+        {
+            get { return m_ScaleRatio_A; }
+            set { m_ScaleRatio_A = value; }
+        }
+        protected float m_ScaleRatio_A;
+        
+        internal float scaleRatio_B
+        {
+            get { return m_ScaleRatio_B; }
+            set { m_ScaleRatio_B = value; }
+        }
+        protected float m_ScaleRatio_B;
+        
+        internal float scaleRatio_C
+        {
+            get { return m_ScaleRatio_C; }
+            set { m_ScaleRatio_C = value; }
+        }
+        protected float m_ScaleRatio_C;
 
         /// <summary>
         /// Determines if Vertex Color Gradient should be used
@@ -1763,6 +1784,55 @@ namespace TMPro
             return m_padding;
         }
 
+        protected virtual float GetPaddingForShaderPlus()
+        {
+            ShaderUtilities.GetShaderPropertyIDs();
+
+            if (m_sharedMaterial == null) return 0;
+
+            m_padding = ShaderUtilities.GetPadding(m_sharedMaterial, this);
+            m_isMaskingEnabled = ShaderUtilities.IsMaskingEnabled(m_sharedMaterial);
+            m_isSDFShader = m_sharedMaterial.HasProperty(ShaderUtilities.ID_WeightNormal);
+
+            return m_padding;
+        }
+
+        protected virtual float GetPaddingForShaderPlus(Material mat)
+        {
+            if (mat == null)
+                return 0;
+
+            m_padding = ShaderUtilities.GetPadding(mat, this);
+            m_isMaskingEnabled = ShaderUtilities.IsMaskingEnabled(m_sharedMaterial);
+            m_isSDFShader = mat.HasProperty(ShaderUtilities.ID_WeightNormal);
+
+            return m_padding;
+        }
+        
+        
+        protected virtual float GetPadding()
+        {
+            if (HasShaderPlusFlag && enableOutline)
+            {
+                return GetPaddingForShaderPlus();
+            }
+            else
+            {
+                return GetPaddingForMaterial();
+            }
+        }
+        
+        protected virtual float GetPadding(Material mat)
+        {
+            if (HasShaderPlusFlag && enableOutline)
+            {
+                return GetPaddingForShaderPlus(mat);
+            }
+            else
+            {
+                return GetPaddingForMaterial(mat);
+            }
+        }
 
         /// <summary>
         /// Method to return the local corners of the Text Container or RectTransform.
@@ -5440,9 +5510,25 @@ namespace TMPro
             m_textInfo.characterInfo[m_characterCount].vertex_TR.tangent = tangent;
             m_textInfo.characterInfo[m_characterCount].vertex_BR.tangent = tangent;
             #endregion end Normals & Tangents
+
+            Vector2 ratioAB = Vector2.one;
+            SetupRatioAB(out ratioAB);
+            m_textInfo.characterInfo[m_characterCount].vertex_BL.uv3 = ratioAB;
+            m_textInfo.characterInfo[m_characterCount].vertex_TL.uv3 = ratioAB;
+            m_textInfo.characterInfo[m_characterCount].vertex_TR.uv3 = ratioAB;
+            m_textInfo.characterInfo[m_characterCount].vertex_BR.uv3 = ratioAB;
         }
 
         protected abstract void SetupNormalsAndTangents(out Vector3 normal, out Vector4 tangent);
+
+        protected virtual void SetupRatioAB(out Vector2 ratioAB)
+        {
+            ratioAB = Vector2.zero;
+            if (m_enableOutline)
+            {
+                ratioAB = new Vector2(m_ScaleRatio_A, m_ScaleRatio_B);
+            }
+        }
 
         /// <summary>
         /// Store vertex information for each sprite.
@@ -5577,11 +5663,11 @@ namespace TMPro
             m_textInfo.meshInfo[materialIndex].uvs2[3 + index_X4] = characterInfoArray[i].vertex_BR.uv2;
 
 
-            // Setup UVS4
-            //m_textInfo.meshInfo[0].uvs4[0 + index_X4] = characterInfoArray[i].vertex_BL.uv4;
-            //m_textInfo.meshInfo[0].uvs4[1 + index_X4] = characterInfoArray[i].vertex_TL.uv4;
-            //m_textInfo.meshInfo[0].uvs4[2 + index_X4] = characterInfoArray[i].vertex_TR.uv4;
-            //m_textInfo.meshInfo[0].uvs4[3 + index_X4] = characterInfoArray[i].vertex_BR.uv4;
+            // Setup UVS3
+            m_textInfo.meshInfo[materialIndex].uvs3[0 + index_X4] = characterInfoArray[i].vertex_BL.uv3;
+            m_textInfo.meshInfo[materialIndex].uvs3[1 + index_X4] = characterInfoArray[i].vertex_TL.uv3;
+            m_textInfo.meshInfo[materialIndex].uvs3[2 + index_X4] = characterInfoArray[i].vertex_TR.uv3;
+            m_textInfo.meshInfo[materialIndex].uvs3[3 + index_X4] = characterInfoArray[i].vertex_BR.uv3;
 
 
             // setup Vertex Colors
@@ -5662,12 +5748,19 @@ namespace TMPro
             }
 
 
-            // Setup UVS4
-            //m_textInfo.meshInfo[0].uvs4[0 + index_X4] = characterInfoArray[i].vertex_BL.uv4;
-            //m_textInfo.meshInfo[0].uvs4[1 + index_X4] = characterInfoArray[i].vertex_TL.uv4;
-            //m_textInfo.meshInfo[0].uvs4[2 + index_X4] = characterInfoArray[i].vertex_TR.uv4;
-            //m_textInfo.meshInfo[0].uvs4[3 + index_X4] = characterInfoArray[i].vertex_BR.uv4;
+            // Setup UVS3
+            m_textInfo.meshInfo[materialIndex].uvs3[0 + index_X4] = characterInfoArray[i].vertex_BL.uv3;
+            m_textInfo.meshInfo[materialIndex].uvs3[1 + index_X4] = characterInfoArray[i].vertex_TL.uv3;
+            m_textInfo.meshInfo[materialIndex].uvs3[2 + index_X4] = characterInfoArray[i].vertex_TR.uv3;
+            m_textInfo.meshInfo[materialIndex].uvs3[3 + index_X4] = characterInfoArray[i].vertex_BR.uv3;
 
+            if (isVolumetric)
+            {
+                m_textInfo.meshInfo[materialIndex].uvs3[4 + index_X4] = characterInfoArray[i].vertex_BL.uv3;
+                m_textInfo.meshInfo[materialIndex].uvs3[5 + index_X4] = characterInfoArray[i].vertex_TL.uv3;
+                m_textInfo.meshInfo[materialIndex].uvs3[6 + index_X4] = characterInfoArray[i].vertex_TR.uv3;
+                m_textInfo.meshInfo[materialIndex].uvs3[7 + index_X4] = characterInfoArray[i].vertex_BR.uv3;
+            }
 
             // setup Vertex Colors
             m_textInfo.meshInfo[materialIndex].colors32[0 + index_X4] = characterInfoArray[i].vertex_BL.color;
@@ -5726,11 +5819,11 @@ namespace TMPro
             m_textInfo.meshInfo[materialIndex].uvs2[3 + index_X4] = characterInfoArray[i].vertex_BR.uv2;
 
 
-            // Setup UVS4
-            //m_textInfo.meshInfo[0].uvs4[0 + index_X4] = characterInfoArray[i].vertex_BL.uv4;
-            //m_textInfo.meshInfo[0].uvs4[1 + index_X4] = characterInfoArray[i].vertex_TL.uv4;
-            //m_textInfo.meshInfo[0].uvs4[2 + index_X4] = characterInfoArray[i].vertex_TR.uv4;
-            //m_textInfo.meshInfo[0].uvs4[3 + index_X4] = characterInfoArray[i].vertex_BR.uv4;
+            // Setup UVS3
+            m_textInfo.meshInfo[materialIndex].uvs3[0 + index_X4] = characterInfoArray[i].vertex_BL.uv3;
+            m_textInfo.meshInfo[materialIndex].uvs3[1 + index_X4] = characterInfoArray[i].vertex_TL.uv3;
+            m_textInfo.meshInfo[materialIndex].uvs3[2 + index_X4] = characterInfoArray[i].vertex_TR.uv3;
+            m_textInfo.meshInfo[materialIndex].uvs3[3 + index_X4] = characterInfoArray[i].vertex_BR.uv3;
 
 
             // setup Vertex Colors
