@@ -321,6 +321,7 @@ namespace TMPro
             get { return m_ScaleRatio_A; }
             set { m_ScaleRatio_A = value; }
         }
+        [SerializeField]
         protected float m_ScaleRatio_A;
         
         internal float scaleRatio_B
@@ -328,6 +329,7 @@ namespace TMPro
             get { return m_ScaleRatio_B; }
             set { m_ScaleRatio_B = value; }
         }
+        [SerializeField]
         protected float m_ScaleRatio_B;
         
         internal float scaleRatio_C
@@ -335,6 +337,7 @@ namespace TMPro
             get { return m_ScaleRatio_C; }
             set { m_ScaleRatio_C = value; }
         }
+        [SerializeField]
         protected float m_ScaleRatio_C;
 
         /// <summary>
@@ -1812,7 +1815,7 @@ namespace TMPro
         
         protected virtual float GetPadding()
         {
-            if (HasShaderPlusFlag && enableOutline)
+            if (HasShaderPlusFlag)
             {
                 return GetPaddingForShaderPlus();
             }
@@ -1824,7 +1827,7 @@ namespace TMPro
         
         protected virtual float GetPadding(Material mat)
         {
-            if (HasShaderPlusFlag && enableOutline)
+            if (HasShaderPlusFlag)
             {
                 return GetPaddingForShaderPlus(mat);
             }

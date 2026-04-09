@@ -313,7 +313,7 @@ namespace TMPro
         /// </summary>
         public override void UpdateMeshPadding()
         {
-            if (HasShaderPlusFlag && enableOutline)
+            if (HasShaderPlusFlag)
             {
                 m_padding = ShaderUtilities.GetPadding(m_sharedMaterial, this);
             }
