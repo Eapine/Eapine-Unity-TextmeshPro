@@ -5523,11 +5523,7 @@ namespace TMPro
 
         protected virtual void SetupRatioAB(out Vector2 ratioAB)
         {
-            ratioAB = Vector2.zero;
-            if (m_enableOutline)
-            {
-                ratioAB = new Vector2(m_ScaleRatio_A, m_ScaleRatio_B);
-            }
+            ratioAB = new Vector2(m_ScaleRatio_A, m_ScaleRatio_B);
         }
 
         /// <summary>
