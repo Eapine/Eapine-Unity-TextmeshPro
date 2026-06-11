@@ -387,6 +387,9 @@ namespace TMPro
                 switch (Application.platform)
                 {
                     case RuntimePlatform.Android:
+#if UNITY_OPENHARMONY
+                    case RuntimePlatform.OpenHarmony:
+#endif
                     case RuntimePlatform.IPhonePlayer:
                     case RuntimePlatform.tvOS:
                         return m_HideMobileInput;
@@ -400,6 +403,9 @@ namespace TMPro
                 switch(Application.platform)
                 {
                     case RuntimePlatform.Android:
+#if UNITY_OPENHARMONY
+                    case RuntimePlatform.OpenHarmony:
+#endif
                     case RuntimePlatform.IPhonePlayer:
                     case RuntimePlatform.tvOS:
                         SetPropertyUtility.SetStruct(ref m_HideMobileInput, value);
@@ -418,6 +424,9 @@ namespace TMPro
                 switch (Application.platform)
                 {
                     case RuntimePlatform.Android:
+#if UNITY_OPENHARMONY
+                    case RuntimePlatform.OpenHarmony:
+#endif
                     case RuntimePlatform.IPhonePlayer:
                     case RuntimePlatform.tvOS:
                     #if UNITY_XR_VISIONOS_SUPPORTED
@@ -435,6 +444,8 @@ namespace TMPro
                     #endif
                     case RuntimePlatform.Switch:
                         return m_HideSoftKeyboard;
+                    case RuntimePlatform.WebGLPlayer:
+                        return TouchScreenKeyboard.isInPlaceEditingAllowed;//false
                     default:
                         return true;
                 }
@@ -445,6 +456,9 @@ namespace TMPro
                 switch (Application.platform)
                 {
                     case RuntimePlatform.Android:
+#if UNITY_OPENHARMONY
+                    case RuntimePlatform.OpenHarmony:
+#endif
                     case RuntimePlatform.IPhonePlayer:
                     case RuntimePlatform.tvOS:
                     #if UNITY_XR_VISIONOS_SUPPORTED
@@ -481,6 +495,9 @@ namespace TMPro
             switch (Application.platform)
             {
                 case RuntimePlatform.Android:
+#if UNITY_OPENHARMONY
+                case RuntimePlatform.OpenHarmony:
+#endif
                 case RuntimePlatform.IPhonePlayer:
                 case RuntimePlatform.tvOS:
                 #if UNITY_XR_VISIONOS_SUPPORTED
@@ -1378,7 +1395,8 @@ namespace TMPro
 
         private bool InPlaceEditing()
         {
-            if (Application.platform == RuntimePlatform.WSAPlayerX86 || Application.platform == RuntimePlatform.WSAPlayerX64 || Application.platform == RuntimePlatform.WSAPlayerARM)
+            if (Application.platform == RuntimePlatform.WSAPlayerX86 || Application.platform == RuntimePlatform.WSAPlayerX64 || Application.platform == RuntimePlatform.WSAPlayerARM
+                || Application.platform == RuntimePlatform.WebGLPlayer)
                 return !TouchScreenKeyboard.isSupported || m_TouchKeyboardAllowsInPlaceEditing;
 
             if (TouchScreenKeyboard.isSupported && shouldHideSoftKeyboard)
@@ -1543,7 +1561,7 @@ namespace TMPro
 
             UpdateMaskRegions();
 
-            if (InPlaceEditing() && isKeyboardUsingEvents() || !isFocused)
+            if ((InPlaceEditing() && isKeyboardUsingEvents()) || !isFocused)
             {
                 return;
             }
@@ -1629,7 +1647,11 @@ namespace TMPro
                     SendOnValueChangedAndUpdateLabel();
                 }
             }
-            else if (m_HideMobileInput && Application.platform == RuntimePlatform.Android)
+            else if (m_HideMobileInput && (Application.platform == RuntimePlatform.Android
+#if UNITY_OPENHARMONY
+                || Application.platform == RuntimePlatform.OpenHarmony
+#endif
+            ))
             {
                 UpdateStringPositionFromKeyboard();
             }
@@ -4073,6 +4095,8 @@ namespace TMPro
             if (EventSystem.current.currentSelectedGameObject != gameObject)
                 EventSystem.current.SetSelectedGameObject(gameObject);
 
+            m_TouchKeyboardAllowsInPlaceEditing = TouchScreenKeyboard.isInPlaceEditingAllowed;
+
             if (TouchScreenKeyboard.isSupported && shouldHideSoftKeyboard == false)
             {
                 if (inputSystem != null && inputSystem.touchSupported)
@@ -4210,8 +4234,6 @@ namespace TMPro
 
         public virtual void OnSubmit(BaseEventData eventData)
         {
-            //Debug.Log("OnSubmit()");
-
             if (!IsActive() || !IsInteractable())
                 return;
 
