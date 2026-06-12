@@ -103,7 +103,7 @@ namespace TMPro
                 return;
             }
 
-            TMP_FontAsset fontAsset = TextMeshProExtension.CreateDynamicFontAsset(font, 90, 9, 2048);
+            TMP_FontAsset fontAsset = TMP_RuntimeFontAsset.CreateFontAsset(font, 90, 9, 2048);
             fontAsset.name = font.name;
             AddFontAsset(fontNickName, fontAsset);
         }

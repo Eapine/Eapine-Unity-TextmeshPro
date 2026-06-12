@@ -5,14 +5,14 @@ using UnityEngine.TextCore.LowLevel;
 
 namespace TMPro
 {
-    public static class TextMeshProExtension
+    public static class TMP_RuntimeFontAsset
     {
-        public static TMP_FontAsset CreateDynamicFontAsset(Font font, int samplingPointSize, int atlasPadding, int atlasSize, bool enableMultiAtlasSupport = true)
+        public static TMP_FontAsset CreateFontAsset(Font font, int samplingPointSize, int atlasPadding, int atlasSize, bool enableMultiAtlasSupport = true)
         {
-            return CreateDynamicFontAsset(font, ShaderUtilities.ShaderRef_MobileSDF, samplingPointSize, atlasPadding, GlyphRenderMode.SDFAA, atlasSize, atlasSize, enableMultiAtlasSupport);
+            return CreateFontAsset(font, ShaderUtilities.ShaderRef_MobileSDF, samplingPointSize, atlasPadding, GlyphRenderMode.SDFAA, atlasSize, atlasSize, enableMultiAtlasSupport);
         }
 
-        public static TMP_FontAsset CreateDynamicFontAsset(Font font, Shader shader, int samplingPointSize, int atlasPadding, GlyphRenderMode renderMode, int atlasWidth, int atlasHeight, bool enableMultiAtlasSupport = true)
+        public static TMP_FontAsset CreateFontAsset(Font font, Shader shader, int samplingPointSize, int atlasPadding, GlyphRenderMode renderMode, int atlasWidth, int atlasHeight, bool enableMultiAtlasSupport = true)
         {
             // Initialize FontEngine
             FontEngine.InitializeFontEngine();
@@ -80,7 +80,7 @@ namespace TMPro
             return fontAsset;
         }
 
-        public static void TMP_FontAsset_Copy(TMP_FontAsset source, TMP_FontAsset dest)
+        public static void CopyFontAsset(TMP_FontAsset source, TMP_FontAsset dest)
         {
             if (source == null || dest == null)
             {

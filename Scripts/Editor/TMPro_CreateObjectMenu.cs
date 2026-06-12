@@ -13,7 +13,7 @@ using UnityEngine.EventSystems;
 
 namespace TMPro.EditorUtilities
 {
-    public static class TMPro_CreateObjectMenu
+    public static partial class TMPro_CreateObjectMenu
     {
 
         /// <summary>
@@ -162,7 +162,7 @@ namespace TMPro.EditorUtilities
         private static TMP_DefaultControls.Resources s_StandardResources;
 
 
-        public static TMP_DefaultControls.Resources GetStandardResources()
+        private static TMP_DefaultControls.Resources GetStandardResources()
         {
             if (s_StandardResources.standard == null)
             {
@@ -226,7 +226,7 @@ namespace TMPro.EditorUtilities
         }
 
 
-        public static void PlaceUIElementRoot(GameObject element, MenuCommand menuCommand)
+        private static void PlaceUIElementRoot(GameObject element, MenuCommand menuCommand)
         {
             GameObject parent = menuCommand.context as GameObject;
             bool explicitParentChoice = true;

@@ -4,7 +4,7 @@ using UnityEditor.Presets;
 
 namespace TMPro.EditorUtilities
 {
-    public static class TMPro_Editor_Extension
+    public static partial class TMPro_CreateObjectMenu
     {
         [MenuItem("Window/TextMeshPro/Create TMP RuntimeFont Settings", false, 2052)]
         public static void CreateTMPRuntimeFontSettings()
@@ -128,13 +128,13 @@ namespace TMPro.EditorUtilities
                 textComponent.text = "New Text";
             }
 
-            TMPro_CreateObjectMenu.PlaceUIElementRoot(go, menuCommand);
+            PlaceUIElementRoot(go, menuCommand);
         }
 
         [MenuItem("GameObject/UI/RuntimeFont/Button - TextMeshPro", false, 2031)]
-        public static void AddButton(MenuCommand menuCommand)
+        public static void AddRuntimeFontButton(MenuCommand menuCommand)
         {
-            GameObject go = TMP_DefaultControls.CreateButton(TMPro_CreateObjectMenu.GetStandardResources());
+            GameObject go = TMP_DefaultControls.CreateButton(GetStandardResources());
 
             // Override font size
             TMP_Text textComponent = go.GetComponentInChildren<TMP_Text>();
@@ -142,7 +142,7 @@ namespace TMPro.EditorUtilities
 
             ConvertMonoInGameObject<TextMeshProUGUI, TMP_RuntimeFontUGUI>(go);
 
-            TMPro_CreateObjectMenu.PlaceUIElementRoot(go, menuCommand);
+            PlaceUIElementRoot(go, menuCommand);
         }
     }
 }
