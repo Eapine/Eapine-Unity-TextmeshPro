@@ -18,7 +18,7 @@ namespace TMPro.EditorUtilities
         {
             ConvertComponentTtoWInAllPrefab<TextMeshProUGUI, TMP_RuntimeFontUGUI>();
         }
-        
+
         [MenuItem("Window/TextMeshPro/Convert all TMP_RuntimeFontUGUI to TextMeshProUGUI", false, 2201)]
         public static void ConvertAll_TMP_RuntimeFontUGUI_To_TextMeshProUGUI()
         {
@@ -30,7 +30,7 @@ namespace TMPro.EditorUtilities
                     Debug.LogError($"{ori.name} fontPath is null or empty");
                     return;
                 }
-                
+
                 TMP_FontAsset fontAsset = null;
                 bool isBuiltin = !fontPath.StartsWith("Assets/", System.StringComparison.Ordinal);
                 if (isBuiltin)
@@ -41,17 +41,35 @@ namespace TMPro.EditorUtilities
                 {
                     fontAsset = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(fontPath);
                 }
-                
+
                 if (fontAsset == null)
                 {
                     Debug.LogError($"{ori.name} {fontPath} fontAsset is null");
                     return;
                 }
-                
+
                 des.font = fontAsset;
-                
+
                 Debug.Log($"{ori.FontNickName} convert to {des.font.name}");
             });
+        }
+
+        [MenuItem("Window/TextMeshPro/Print all TMP_RuntimeFontUGUI", false, 2202)]
+        public static void PrintAll_TMP_RuntimeFontUGUI()
+        {
+            string[] guids = AssetDatabase.FindAssets("t:Prefab", new string[] { "Assets" });
+
+            foreach (string guid in guids)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+
+                GameObject prefab = AssetDatabase.LoadAssetAtPath(path, typeof(GameObject)) as GameObject;
+                TMP_RuntimeFontUGUI[] components = prefab.GetComponentsInChildren<TMP_RuntimeFontUGUI>(true);
+                foreach (var item in components)
+                {
+                    Debug.Log($"{path} | {item.name}");
+                }
+            }
         }
 
         //把prefab中的所以T换成W
@@ -96,6 +114,7 @@ namespace TMPro.EditorUtilities
                     return script;
                 }
             }
+
             return null;
         }
 
@@ -107,7 +126,7 @@ namespace TMPro.EditorUtilities
             T[] components = gameObject.GetComponentsInChildren<T>(true);
             foreach (var item in components)
             {
-                if (item.GetType() != typeof(T))//判断类型绝对相等
+                if (item.GetType() != typeof(T)) //判断类型绝对相等
                 {
                     continue;
                 }
@@ -117,7 +136,7 @@ namespace TMPro.EditorUtilities
                 {
                     backup = UnityEngine.Object.Instantiate(item);
                 }
-                
+
                 var so = new SerializedObject(item);
                 so.Update();
 
@@ -135,7 +154,7 @@ namespace TMPro.EditorUtilities
                     so.ApplyModifiedProperties();
                     UnityEngine.Object.DestroyImmediate(backup.gameObject);
                 }
-                
+
                 flag = true;
             }
 
