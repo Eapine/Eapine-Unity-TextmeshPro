@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEditor;
 using UnityEditor.Presets;
 
@@ -17,9 +18,44 @@ namespace TMPro.EditorUtilities
         {
             ConvertComponentTtoWInAllPrefab<TextMeshProUGUI, TMP_RuntimeFontUGUI>();
         }
+        
+        [MenuItem("Window/TextMeshPro/Convert all TMP_RuntimeFontUGUI to TextMeshProUGUI", false, 2201)]
+        public static void ConvertAll_TMP_RuntimeFontUGUI_To_TextMeshProUGUI()
+        {
+            ConvertComponentTtoWInAllPrefab<TMP_RuntimeFontUGUI, TextMeshProUGUI>((TMP_RuntimeFontUGUI ori, TextMeshProUGUI des) =>
+            {
+                string fontPath = ori.FontPath;
+                if (string.IsNullOrEmpty(fontPath))
+                {
+                    Debug.LogError($"{ori.name} fontPath is null or empty");
+                    return;
+                }
+                
+                TMP_FontAsset fontAsset = null;
+                bool isBuiltin = !fontPath.StartsWith("Assets/", System.StringComparison.Ordinal);
+                if (isBuiltin)
+                {
+                    fontAsset = Resources.Load<TMP_FontAsset>(fontPath);
+                }
+                else
+                {
+                    fontAsset = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(fontPath);
+                }
+                
+                if (fontAsset == null)
+                {
+                    Debug.LogError($"{ori.name} {fontPath} fontAsset is null");
+                    return;
+                }
+                
+                des.font = fontAsset;
+                
+                Debug.Log($"{ori.FontNickName} convert to {des.font.name}");
+            });
+        }
 
         //把prefab中的所以T换成W
-        public static void ConvertComponentTtoWInAllPrefab<T, W>() where T : MonoBehaviour where W : MonoBehaviour
+        public static void ConvertComponentTtoWInAllPrefab<T, W>(Action<T, W> action = null) where T : MonoBehaviour where W : MonoBehaviour
         {
             string[] guids = AssetDatabase.FindAssets("t:Prefab", new string[] { "Assets" });
 
@@ -34,7 +70,7 @@ namespace TMPro.EditorUtilities
                 //实例化物体
                 GameObject instance = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
 
-                bool flag = ConvertMonoInGameObject<T, W>(instance);
+                bool flag = ConvertMonoInGameObject<T, W>(instance, action);
 
                 // 将数据替换到asset
                 PrefabUtility.SaveAsPrefabAsset(instance, path);
@@ -63,7 +99,7 @@ namespace TMPro.EditorUtilities
             return null;
         }
 
-        public static bool ConvertMonoInGameObject<T, W>(GameObject gameObject) where T : MonoBehaviour where W : MonoBehaviour
+        public static bool ConvertMonoInGameObject<T, W>(GameObject gameObject, Action<T, W> action = null) where T : MonoBehaviour where W : MonoBehaviour
         {
             MonoScript script = FindMonoScript<W>();
 
@@ -76,6 +112,12 @@ namespace TMPro.EditorUtilities
                     continue;
                 }
 
+                T backup = null;
+                if (action != null)
+                {
+                    backup = UnityEngine.Object.Instantiate(item);
+                }
+                
                 var so = new SerializedObject(item);
                 so.Update();
 
@@ -86,6 +128,14 @@ namespace TMPro.EditorUtilities
                 so.ApplyModifiedProperties();
 
                 (so.targetObject as MonoBehaviour).enabled = oldEnable;
+
+                if (action != null)
+                {
+                    action(backup, so.targetObject as W);
+                    so.ApplyModifiedProperties();
+                    UnityEngine.Object.DestroyImmediate(backup.gameObject);
+                }
+                
                 flag = true;
             }
 
