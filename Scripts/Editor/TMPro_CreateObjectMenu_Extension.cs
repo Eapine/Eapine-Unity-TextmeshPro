@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Text;
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.Presets;
@@ -16,7 +18,25 @@ namespace TMPro.EditorUtilities
         [MenuItem("Window/TextMeshPro/Convert all TextMeshProUGUI to TMP_RuntimeFontUGUI", false, 2200)]
         public static void ConvertAll_TextMeshProUGUI_To_TMP_RuntimeFontUGUI()
         {
-            ConvertComponentTtoWInAllPrefab<TextMeshProUGUI, TMP_RuntimeFontUGUI>();
+            ConvertComponentTtoWInAllPrefab<TextMeshProUGUI, TMP_RuntimeFontUGUI>((TextMeshProUGUI ori, TMP_RuntimeFontUGUI des) =>
+            {
+                des.font = null;
+                
+                string fontPath = AssetDatabase.GetAssetPath(ori.font);
+                if (IsUnderResources(fontPath))
+                {
+                    fontPath = ToResourcesLoadPath(fontPath);
+                }
+                
+                int index = TMP_RuntimeFontSettings.GetIndexByPath(fontPath);
+                
+                var so = new SerializedObject(des);
+                so.Update();
+                so.FindProperty("m_FontIndex").intValue = index;
+                so.ApplyModifiedProperties();
+                
+                Debug.Log($"{fontPath} convert to {des.FontNickName}");
+            });
         }
 
         [MenuItem("Window/TextMeshPro/Convert all TMP_RuntimeFontUGUI to TextMeshProUGUI", false, 2201)]
@@ -212,6 +232,54 @@ namespace TMPro.EditorUtilities
             ConvertMonoInGameObject<TextMeshProUGUI, TMP_RuntimeFontUGUI>(go);
 
             PlaceUIElementRoot(go, menuCommand);
+        }
+        
+        public static bool IsUnderResources(string assetPath)
+        {
+            if (string.IsNullOrEmpty(assetPath))
+                return false;
+
+            string[] segments = assetPath.Replace('\\', '/').Split('/');
+            foreach (var seg in segments)
+            {
+                if (string.Equals(seg, "Resources", System.StringComparison.OrdinalIgnoreCase))
+                    return true;
+            }
+            return false;
+        }
+        
+        public static string ToResourcesLoadPath(string assetPath)
+        {
+            if (string.IsNullOrEmpty(assetPath))
+                return null;
+
+            string[] segments = assetPath.Replace('\\', '/').Split('/');
+
+            int resourcesIndex = -1;
+            for (int i = 0; i < segments.Length; i++)
+            {
+                if (string.Equals(segments[i], "Resources", System.StringComparison.OrdinalIgnoreCase))
+                {
+                    resourcesIndex = i;
+                    break;
+                }
+            }
+
+            // 不在 Resources 下，或路径本身就是 Resources 根目录
+            if (resourcesIndex < 0 || resourcesIndex >= segments.Length - 1)
+                return null;
+
+            var sb = new StringBuilder();
+            for (int i = resourcesIndex + 1; i < segments.Length; i++)
+            {
+                string seg = segments[i];
+                if (i == segments.Length - 1)
+                    seg = Path.GetFileNameWithoutExtension(seg); // 去掉扩展名
+                if (sb.Length > 0)
+                    sb.Append('/');
+                sb.Append(seg);
+            }
+            return sb.Length > 0 ? sb.ToString() : null;
         }
     }
 }

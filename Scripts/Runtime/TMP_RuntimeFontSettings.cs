@@ -59,6 +59,27 @@ namespace TMPro
         }
 
         /// <summary>
+        /// 根据字体路径取得索引
+        /// </summary>
+        /// <param name="path">字体路径。</param>
+        /// <returns>索引。</returns>
+        public static int GetIndexByPath(string path)
+        {
+            if (FontNickNameAndPath == null || path == null)
+            {
+                return -1;
+            }
+            for (int i = 0; i < FontNickNameAndPath.Count; i++)
+            {
+                if (FontNickNameAndPath[i].path == path)
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        /// <summary>
         /// 根据昵称取得字体路径。
         /// </summary>
         /// <param name="nickName">昵称。</param>
