@@ -18,60 +18,120 @@ namespace TMPro.EditorUtilities
         [MenuItem("Window/TextMeshPro/Convert all TextMeshProUGUI to TMP_RuntimeFontUGUI", false, 2200)]
         public static void ConvertAll_TextMeshProUGUI_To_TMP_RuntimeFontUGUI()
         {
-            ConvertComponentTtoWInAllPrefab<TextMeshProUGUI, TMP_RuntimeFontUGUI>((TextMeshProUGUI ori, TMP_RuntimeFontUGUI des) =>
-            {
-                des.font = null;
-                
-                string fontPath = AssetDatabase.GetAssetPath(ori.font);
-                if (IsUnderResources(fontPath))
+            ConvertComponentTtoWInAllPrefab<TextMeshProUGUI, TMP_RuntimeFontUGUI>(
+                (TextMeshProUGUI ori) =>
                 {
-                    fontPath = ToResourcesLoadPath(fontPath);
-                }
-                
-                int index = TMP_RuntimeFontSettings.GetIndexByPath(fontPath);
-                
-                var so = new SerializedObject(des);
-                so.Update();
-                so.FindProperty("m_FontIndex").intValue = index;
-                so.ApplyModifiedProperties();
-                
-                Debug.Log($"{fontPath} convert to {des.FontNickName}");
-            });
+                    if (ori.font == null)
+                    {
+                        Debug.LogWarning($"{ori.name} font is null");
+                        return false;
+                    }
+
+                    string fontPath = AssetDatabase.GetAssetPath(ori.font);
+                    if (IsUnderResources(fontPath))
+                    {
+                        fontPath = ToResourcesLoadPath(fontPath);
+                    }
+
+                    int index = TMP_RuntimeFontSettings.GetIndexByPath(fontPath);
+                    if (index < 0)
+                    {
+                        Debug.LogWarning($"{ori.name} | {fontPath} is not in TMP_RuntimeFontSettings");
+                        return false;
+                    }
+                    
+                    return true;
+                },
+                (TextMeshProUGUI ori, TMP_RuntimeFontUGUI des) =>
+                {
+                    des.font = null;
+
+                    string fontPath = AssetDatabase.GetAssetPath(ori.font);
+                    if (IsUnderResources(fontPath))
+                    {
+                        fontPath = ToResourcesLoadPath(fontPath);
+                    }
+
+                    int index = TMP_RuntimeFontSettings.GetIndexByPath(fontPath);
+
+                    var so = new SerializedObject(des);
+                    so.Update();
+                    so.FindProperty("m_FontIndex").intValue = index;
+                    so.ApplyModifiedProperties();
+
+                    Debug.Log($"{fontPath} convert to {des.FontNickName}");
+                });
         }
 
         [MenuItem("Window/TextMeshPro/Convert all TMP_RuntimeFontUGUI to TextMeshProUGUI", false, 2201)]
         public static void ConvertAll_TMP_RuntimeFontUGUI_To_TextMeshProUGUI()
         {
-            ConvertComponentTtoWInAllPrefab<TMP_RuntimeFontUGUI, TextMeshProUGUI>((TMP_RuntimeFontUGUI ori, TextMeshProUGUI des) =>
-            {
-                string fontPath = ori.FontPath;
-                if (string.IsNullOrEmpty(fontPath))
+            ConvertComponentTtoWInAllPrefab<TMP_RuntimeFontUGUI, TextMeshProUGUI>(
+                (TMP_RuntimeFontUGUI ori) =>
                 {
-                    Debug.LogError($"{ori.name} fontPath is null or empty");
-                    return;
-                }
+                    int fontIndex = ori.FontIndex;
+                    if (fontIndex < 0)
+                    {
+                        Debug.LogWarning($"{ori.name} fontIndex is invalid");
+                        return false;
+                    }
 
-                TMP_FontAsset fontAsset = null;
-                bool isBuiltin = !fontPath.StartsWith("Assets/", System.StringComparison.Ordinal);
-                if (isBuiltin)
+                    string fontPath = TMP_RuntimeFontSettings.GetPathByIndex(fontIndex);
+                    if (string.IsNullOrEmpty(fontPath))
+                    {
+                        Debug.LogError($"{ori.name} fontPath is null or empty");
+                        return false;
+                    }
+                    
+                    TMP_FontAsset fontAsset = null;
+                    bool isBuiltin = !fontPath.StartsWith("Assets/", System.StringComparison.Ordinal);
+                    if (isBuiltin)
+                    {
+                        fontAsset = Resources.Load<TMP_FontAsset>(fontPath);
+                    }
+                    else
+                    {
+                        fontAsset = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(fontPath);
+                    }
+
+                    if (fontAsset == null)
+                    {
+                        Debug.LogError($"{ori.name} {fontPath} fontAsset is null");
+                        return false;
+                    }
+                    
+                    return true; 
+                }, 
+                (TMP_RuntimeFontUGUI ori, TextMeshProUGUI des) =>
                 {
-                    fontAsset = Resources.Load<TMP_FontAsset>(fontPath);
-                }
-                else
-                {
-                    fontAsset = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(fontPath);
-                }
+                    string fontPath = ori.FontPath;
+                    if (string.IsNullOrEmpty(fontPath))
+                    {
+                        Debug.LogError($"{ori.name} fontPath is null or empty");
+                        return;
+                    }
 
-                if (fontAsset == null)
-                {
-                    Debug.LogError($"{ori.name} {fontPath} fontAsset is null");
-                    return;
-                }
+                    TMP_FontAsset fontAsset = null;
+                    bool isBuiltin = !fontPath.StartsWith("Assets/", System.StringComparison.Ordinal);
+                    if (isBuiltin)
+                    {
+                        fontAsset = Resources.Load<TMP_FontAsset>(fontPath);
+                    }
+                    else
+                    {
+                        fontAsset = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(fontPath);
+                    }
 
-                des.font = fontAsset;
+                    if (fontAsset == null)
+                    {
+                        Debug.LogError($"{ori.name} {fontPath} fontAsset is null");
+                        return;
+                    }
 
-                Debug.Log($"{ori.FontNickName} convert to {des.font.name}");
-            });
+                    des.font = fontAsset;
+
+                    Debug.Log($"{ori.FontNickName} convert to {des.font.name}");
+                });
         }
 
         [MenuItem("Window/TextMeshPro/Print all TMP_RuntimeFontUGUI", false, 2202)]
@@ -93,7 +153,7 @@ namespace TMPro.EditorUtilities
         }
 
         //把prefab中的所以T换成W
-        public static void ConvertComponentTtoWInAllPrefab<T, W>(Action<T, W> action = null) where T : MonoBehaviour where W : MonoBehaviour
+        public static void ConvertComponentTtoWInAllPrefab<T, W>(Func<T, bool> conditionAction = null, Action<T, W> postAction = null) where T : MonoBehaviour where W : MonoBehaviour
         {
             string[] guids = AssetDatabase.FindAssets("t:Prefab", new string[] { "Assets" });
 
@@ -108,7 +168,7 @@ namespace TMPro.EditorUtilities
                 //实例化物体
                 GameObject instance = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
 
-                bool flag = ConvertMonoInGameObject<T, W>(instance, action);
+                bool flag = ConvertMonoInGameObject<T, W>(instance, conditionAction, postAction);
 
                 // 将数据替换到asset
                 PrefabUtility.SaveAsPrefabAsset(instance, path);
@@ -138,7 +198,7 @@ namespace TMPro.EditorUtilities
             return null;
         }
 
-        public static bool ConvertMonoInGameObject<T, W>(GameObject gameObject, Action<T, W> action = null) where T : MonoBehaviour where W : MonoBehaviour
+        public static bool ConvertMonoInGameObject<T, W>(GameObject gameObject, Func<T, bool> conditionAction = null, Action<T, W> postAction = null) where T : MonoBehaviour where W : MonoBehaviour
         {
             MonoScript script = FindMonoScript<W>();
 
@@ -151,8 +211,13 @@ namespace TMPro.EditorUtilities
                     continue;
                 }
 
+                if (conditionAction != null && !conditionAction(item))
+                {
+                    continue;
+                }
+                
                 T backup = null;
-                if (action != null)
+                if (postAction != null)
                 {
                     backup = UnityEngine.Object.Instantiate(item);
                 }
@@ -168,9 +233,9 @@ namespace TMPro.EditorUtilities
 
                 (so.targetObject as MonoBehaviour).enabled = oldEnable;
 
-                if (action != null)
+                if (postAction != null)
                 {
-                    action(backup, so.targetObject as W);
+                    postAction(backup, so.targetObject as W);
                     so.ApplyModifiedProperties();
                     UnityEngine.Object.DestroyImmediate(backup.gameObject);
                 }

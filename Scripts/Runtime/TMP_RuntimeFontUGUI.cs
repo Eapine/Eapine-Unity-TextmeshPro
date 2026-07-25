@@ -24,6 +24,11 @@ namespace TMPro
             get { return TMP_RuntimeFontSettings.GetPathByIndex(m_FontIndex); }
         }
 
+        public int FontIndex
+        {
+            get { return m_FontIndex; }
+        }
+
         public override TMP_FontAsset font
         {
             get { return m_runtimeFontAsset; }
